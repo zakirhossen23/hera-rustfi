@@ -1,0 +1,59 @@
+.user.UserContainer {
+    margin: 7rem;
+    margin-top: 2rem;
+    margin-bottom: 3rem;
+}
+
+.user.UserImage {
+    border-radius: 14px;
+    background: white;
+    width: 13rem;
+    height: 13rem;
+    padding: 6px;
+}
+
+.user.lsp5-Container{
+    margin: 7rem;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.user.lsp5-grid{
+    display: flex;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    
+    background: #121f29;
+    padding: 1rem;
+    border-radius: 1rem;
+}
+
+
+
+.user.lsp12-Container{
+    margin: 1rem 7rem;
+    margin-top: 1rem;
+}
+
+.user.lsp12-grid{
+    display: flex;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+    background: #121f29;
+    padding: 1rem;
+    border-radius: 1rem;
+}
+
+
+.user.imagecontainer{
+    display: flex;
+    width: 100%;
+    background: #121f29;
+    padding: 1rem ;
+    color: white;
+    border-radius: 1rem;
+}
+.user.LoadingArea{
+    margin: 0;
+    height:0;
+}

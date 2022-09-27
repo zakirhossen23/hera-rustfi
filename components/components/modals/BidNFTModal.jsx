@@ -1,0 +1,183 @@
+import { Dialog } from "@heathmont/moon-components";
+import { Header, Footer } from "@heathmont/moon-core";
+import { Button } from "@heathmont/moon-core-tw";
+import { ControlsClose } from "@heathmont/moon-icons";
+import { useState } from "react";
+import Form from "react-bootstrap/Form";
+import * as nearAPI from "near-api-js"
+import UseFormInput from "../UseFormInput";
+
+export default function BidNFTModal({
+  show,
+  onHide,
+  contract,
+  senderAddress,
+  tokenId,
+  eventId,
+  toAddress,
+  type,
+  Highestbid,
+}) {
+  //Variables
+  const [Alert, setAlert] = useState("");
+  const Web3 = require("web3");
+
+  const sleep = (milliseconds) => {
+    //Custom Sleep function to wait
+    return new Promise((resolve) => setTimeout(resolve, milliseconds));
+  };
+
+  //Input fields
+  const [Amount, AmountInput] = UseFormInput({
+    type: "text",
+    placeholder: "Amount",
+  });
+
+  function activateWarningModal(TextAlert) {
+    //Activating Warning Text
+    var alertELM = document.getElementById("alert");
+    alertELM.style = "contents";
+    setAlert(TextAlert);
+  }
+  function activateWorkingModal(TextAlert) {
+    //Activating Working Text
+    var alertELM = document.getElementById("workingalert");
+    alertELM.style = "contents";
+    setAlert(TextAlert);
+  }
+
+  async function bidNFT() {
+    //Bid NFT function
+
+    var BidNFTBTN = document.getElementById("bidNFTBTN");
+    BidNFTBTN.disabled = true;
+    if (Number(Amount) < Number(Highestbid)) {
+      // If given bid price is less than highest bid
+      activateWarningModal(`Amount cannot be under ${Highestbid} NEAR`);
+      return;
+    } else {
+      var alertELM = document.getElementById("alert");
+      alertELM.style.display = "none";
+    }
+    try {
+
+
+      
+      const tokenUri = await contract.tokenURI(tokenId);
+      var parsed = await JSON.parse(tokenUri);
+      if (
+        Number(parsed["properties"]["price"]["description"]) < Number(Amount)
+      ) {
+        parsed["properties"]["price"]["description"] = Amount;
+        parsed["properties"]["higherbidadd"]["description"] =walletConnection.getAccountId();
+      }
+      let currentDate = new Date();
+      const createdObject = {
+        title: "Asset Metadata Bids",
+        type: "object",
+        properties: {
+          username: {
+            type: "string",
+            description: walletConnection.getAccountId(),
+          },
+          bid: {
+            type: "string",
+            description: Amount,
+          },
+          time: {
+            type: "string",
+            description: currentDate,
+          },
+        },
+      };
+      activateWorkingModal("Please confirm creating Bid...");
+      const totalraised = await contract.getEventRaised(Number(eventId));
+      let Raised = 0;
+      Raised = Number(totalraised) + Number(Amount);
+      const result2 = await contract.createBid(
+        tokenId,
+        JSON.stringify(createdObject),
+        JSON.stringify(parsed),
+        senderAddress,
+        eventId,
+        Raised.toString()
+        );
+      activateWorkingModal("Bidding...."); // Bidding on NEAR
+
+        await window.nearcontract.contribute({}, "60000000000000",nearAPI.utils.format.parseNearAmount(Amount).toString())
+        
+        // await sleep(5000)
+        // activateWorkingModal("Success!");
+      BidNFTBTN.disabled = false;
+      // window.location.reload();
+    } catch (e) {
+      console.error(e);
+      // activateWarningModal(`Error! Please try again!`);
+      var alertELM = document.getElementById("workingalert");
+      alertELM.style.display = "none";
+      return;
+    }
+  }
+
+  return (
+    <Dialog
+      isOpen={show}
+      onDismiss={onHide}
+      maxWidth="480px"
+      position="CENTER"
+      hideCloseButton
+      variant="new"
+      heading={
+        <Header
+          closeButton={
+            <ControlsClose
+              className="text-moon-24 text-trunks"
+              onClick={onHide}
+            />
+          }
+          isDivider={true}
+        >
+          Bid NFT
+        </Header>
+      }
+    >
+      <div className="p-6 flex flex-col gap-6">
+        <Form className="flex flex-col gap-6">
+          <div
+            id="alert"
+            style={{ display: "none", fontSize: "30px" }}
+            className="text-dodoria bg-goku p-4 rounded-lg"
+            role="alert"
+          >
+            {Alert}
+          </div>
+          <div
+            id="workingalert"
+            style={{ display: "none", fontSize: "30px" }}
+            className="text-roshi bg-hit p-4 rounded-lg"
+            role="alert"
+          >
+            {Alert}
+          </div>
+          <Form.Group controlId="formGroupName">
+            <div className="mb-3">Bid Amount in NEAR</div>
+            {AmountInput}
+          </Form.Group>
+        </Form>
+      </div>
+      <Footer
+        primButton={
+          <Button variant="primary" id="bidNFTBTN" onClick={bidNFT}>
+            Bid NFT
+          </Button>
+        }
+        tertButton={
+          <Button variant="ghost" onClick={onHide}>
+            Cancel
+          </Button>
+        }
+        isDivider
+      />
+    </Dialog>
+  );
+}
