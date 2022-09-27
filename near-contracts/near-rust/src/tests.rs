@@ -154,9 +154,8 @@ fn test_panics_remove_from_blacklist() {
 
 
 
+
 // #[cfg(test)]
-// use near_sdk::test_utils::{ accounts, VMContextBuilder };
-// use near_sdk::{ testing_env, ONE_NEAR };
 
 // NFT minting Test
 #[test]
@@ -174,11 +173,14 @@ fn test_create_event() {
   
     contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
   
+    // println!("{}",contract.get_all_events());
+
     let get_event_uri = contract._event_uris.get(&0);
     
     let unwraped = get_event_uri.unwrap();
     
     assert_eq!(unwraped[1], "Event metadata #1");
   }
+  
   
   

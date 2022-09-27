@@ -9,6 +9,7 @@ use near_sdk::{
   AccountId,
   Balance,
   Promise,
+  serde_json
 };
 
 mod external;
@@ -19,6 +20,7 @@ use crate::fungible_tokens::*;
 use crate::settings::*;
 use external::vault_contract;
 use std::collections::HashMap;
+
 
 #[near_bindgen]
 #[derive(BorshDeserialize, BorshSerialize)]
@@ -64,7 +66,7 @@ impl Contract {
     return unsafe { _TOKEN_IDS };
   }
 
-  pub fn create_event(&mut self, _event_wallet: &Box<str>, _event_uri: &Box<str>) -> i32 {
+  pub fn create_event(&mut self, _event_wallet: String, _event_uri: String) -> i32 {
     let mut stuff : Vec<String> = Vec::new();
     stuff.push(_event_wallet.to_string());
     stuff.push(_event_uri.to_string());
@@ -74,6 +76,18 @@ impl Contract {
     unsafe {_EVENT_IDS += 1;}
     return unsafe { _EVENT_IDS };
   }
+
+  pub fn get_all_events(&self)-> String{
+    let json = serde_json::to_string(&self._event_uris).unwrap();
+    return json;
+  }
+
+  pub fn event_uri(&self,event_id:&i32)-> String{
+    let json = serde_json::to_string(&self._event_uris.get(event_id)).unwrap();
+    return json;
+  }
+
+
 
   
   pub fn request_funds(&mut self, receiver_id: AccountId, amount: U128) {
@@ -128,7 +142,7 @@ impl Contract {
     assert_self();
     self.blacklist.remove(&account_id);
   }
-
+ 
   // #[private] this macro does not expand for unit testing therefore I'm ignoring it for the time being
   pub fn clear_recent_receivers(&mut self) {
     assert_self();
@@ -158,3 +172,37 @@ impl Contract {
     vault_contract::ext(VAULT_ID.parse().unwrap()).request_funds();
   }
 }
+
+
+
+#[cfg(test)]
+
+// NFT minting Test
+#[test]
+fn test_mint_token() {
+  let mut contract = Contract::default();
+
+  contract.mint_nft(String::from("NFT metadata #1"));
+  assert_eq!(contract._token_uris.get(&1), None);
+}
+
+// Creating Event Test
+#[test]
+fn test_create_event() {
+    let mut contract = Contract::default();
+  
+    contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
+  
+    // println!("{}",contract.event_uri(&0));
+    // println!("{}",contract.get_all_events());
+
+
+    // let get_event_uri = contract._event_uris.get(&0);
+    
+    // let unwraped = get_event_uri.unwrap();
+    
+    // assert_eq!(unwraped[1], "Event metadata #1");
+  }
+  
+  
+  

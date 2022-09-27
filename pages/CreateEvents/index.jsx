@@ -128,24 +128,21 @@ export default function CreateEvents() {
     try {
       // Creating Event in Rust Smart contract
       window.nearcontract.create_event({"_event_wallet":window.walletConnection.getAccountId(),"_event_uri":JSON.stringify(createdObject)}, "60000000000000")
-      await contract.createEvent(
-        window.walletConnection.getAccountId(),
-        JSON.stringify(createdObject)
-      );
+  
 
-      //Getting the event id of new one
-      let eventid = await contract.totalEvent();
-      if (document.getElementById("plugin").checked) {
-        await CreatePlugin(
-          `http://${window.location.host}/donation/auction?[${eventid}]`
-        );
-      }
+      // //Getting the event id of new one
+      // let eventid = await contract.totalEvent();
+      // if (document.getElementById("plugin").checked) {
+      //   await CreatePlugin(
+      //     `http://${window.location.host}/donation/auction?[${eventid}]`
+      //   );
+      // }
     } catch (error) {
       console.error(error);
       window.location.href = "/login?[/]"; //If found any error then it will let the user to login page
     }
-    window.location.href = "/donation"; //If it created sucessfully then it will redirect to donation
-    CreateEVENTBTN.disabled = false;
+    // window.location.href = "/donation"; //If it created sucessfully then it will redirect to donation
+    // CreateEVENTBTN.disabled = false;
   }
 
   function CreateEventBTN() {

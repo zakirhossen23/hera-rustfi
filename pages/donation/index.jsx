@@ -54,17 +54,15 @@ export default function Donation() {
     try {
       if (contract) {
         setAccountAddress(window.accountId);
-        const totalEvent = await contract.totalEvent(); //Getting total event (Number)
+        const totalEvent =JSON.parse(await window.nearcontract.get_all_events()); //Getting total event (Number)
         const arr = [];
 
-        for (let i = 0; i < Number(totalEvent); i++) {
+        for (let i = 0; i < Object.keys(totalEvent).length; i++) {
           //total event number Iteration
-          const valueAll = await contract.eventURI(i); //Getting custom eventURI from smart contract as JSON
-          const value = valueAll[1];
-          const statusvalue = valueAll[2]; //Get Event Status if it is finished or waiting for NFT release
+          const object = JSON.parse(totalEvent[i][1]);
+          const statusvalue = object[2]; //Get Event Status if it is finished or waiting for NFT release
 
-          if (value) {
-            const object = JSON.parse(value); //Parsing JSON to object
+          if (object) {
             //Checking if the event date is expired or not
             var c = new Date(object.properties.Date.description).getTime();
             var n = new Date().getTime();
@@ -99,16 +97,7 @@ export default function Donation() {
       console.error(error);
     }
   }
-  function activateCreateNFTModal(e) {
-    //Showing Donate NFT Modal
-    setselectid(e.target.getAttribute("eventid"));
-    setSelectedTitle(e.target.getAttribute("eventtitle"));
-    setSelectedendDate(e.target.getAttribute("date"));
-    setSelectedWallet(e.target.getAttribute("wallet"));
-    setselectedtype("NFT");
-
-    setModalShow(true);
-  }
+  
 
   function LeftDate(datetext, status) {
     //Counting Left date in date format
