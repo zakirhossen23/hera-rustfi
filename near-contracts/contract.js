@@ -22,7 +22,10 @@ async function initContract() {
   
     const wallet = window.walletConnection;
     // connect to a NEAR smart contract
-    window.nearcontract = new nearAPI.Contract(wallet.account(), 'hera-near.testnet')
+    window.nearcontract = new nearAPI.Contract(wallet.account(), 'hrea-near2.testnet',{
+      viewMethods: ['get_recent_contributions'],
+      changeMethods: ['create_event', 'mint_nft']
+    })
     // Getting the Account ID. If unauthorized yet, it's just empty string.
     window.accountId = window.walletConnection.getAccountId();
   } catch (error) {
@@ -33,5 +36,7 @@ async function initContract() {
 
 if (typeof window !== "undefined") {
   window.nearInitPromise = initContract()
+
+  
 }
 // export default null;

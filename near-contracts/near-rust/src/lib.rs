@@ -64,7 +64,7 @@ impl Contract {
     return unsafe { _TOKEN_IDS };
   }
 
-  pub fn create_event(&mut self, _event_wallet: String, _event_uri: String) -> i32 {
+  pub fn create_event(&mut self, _event_wallet: &Box<str>, _event_uri: &Box<str>) -> i32 {
     let mut stuff : Vec<String> = Vec::new();
     stuff.push(_event_wallet.to_string());
     stuff.push(_event_uri.to_string());

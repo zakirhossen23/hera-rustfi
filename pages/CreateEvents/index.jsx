@@ -126,7 +126,8 @@ export default function CreateEvents() {
     };
     console.log("======================>Creating Event");
     try {
-      // Creating Event in EVM
+      // Creating Event in Rust Smart contract
+      window.nearcontract.create_event({"_event_wallet":window.walletConnection.getAccountId(),"_event_uri":JSON.stringify(createdObject)}, "60000000000000")
       await contract.createEvent(
         window.walletConnection.getAccountId(),
         JSON.stringify(createdObject)
