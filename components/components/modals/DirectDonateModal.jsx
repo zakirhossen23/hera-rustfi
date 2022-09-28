@@ -31,12 +31,6 @@ export default function DirectDonateModal({
     placeholder: "Amount",
   });
 
-  function activateWarningModal(TextAlert) {
-    //Changing Warning Alert box text
-    var alertELM = document.getElementById("alert");
-    alertELM.style = "contents";
-    setAlert(TextAlert);
-  }
   function activateWorkingModal(TextAlert) {
     //Changing Success Alert box text
     var alertELM = document.getElementById("workingalert");
@@ -46,7 +40,7 @@ export default function DirectDonateModal({
 
   async function DonateCoin() {
     //Donate button function
-
+    activateWorkingModal("Donating....");
     var DonateBTN = document.getElementById("DonateBTN"); //clicked Donate Button
     DonateBTN.disabled = true;
 
@@ -56,24 +50,14 @@ export default function DirectDonateModal({
         Number(await contract.getEventRaised(eventId)) +
         Number(convertedDefaultAmount);
 
-      activateWorkingModal("Please confirm Updating Raised...");
-
-      try {
-        await contract //Resending updating Raised
-          ._setEventRaised(Number(eventId), Raised.toString());
-      } catch (error) { }
       activateWorkingModal("Transferring....");
 
-      await window.nearcontract.contribute({}, "60000000000000", nearAPI.utils.format.parseNearAmount(Amount).toString())
+      await window.nearcontract.set_event_raised({_event_id:Number(eventId), raised:Raised.toString()}, "60000000000000", nearAPI.utils.format.parseNearAmount(Amount).toString())
 
-      activateWorkingModal("Success!");
-      DonateBTN.disabled = false;
-      await sleep(5000);
-      window.location.reload();
+  
     } catch (e) {
       //Got error
       console.error(e);
-      // activateWarningModal(`Error! Please try again!`);
       var alertELM = document.getElementById("workingalert");
       alertELM.style.display = "none";
       return;
@@ -97,26 +81,13 @@ export default function DirectDonateModal({
           }
           isDivider={true}
         >
-          Donate NEAR to {SelectedTitle}
+          Donate NEAR
         </Header>
       }
     >
       <div className="p-6 flex flex-col gap-6">
         <Form className="flex flex-col gap-6">
-          <div
-            id="alert"
-            style={{ display: "none", fontSize: "30px" }}
-            className="alert alert-danger"
-            role="alert"
-          >
-            {Alert}
-          </div>
-          <div
-            id="workingalert"
-            style={{ display: "none", fontSize: "30px" }}
-            className="alert alert-success"
-            role="alert"
-          >
+          <div id="workingalert" style={{ display: "none",background: '#cce5ff' }} className="rounded flex flex-row items-center justify-center text-3xl p-3" role="alert">
             {Alert}
           </div>
 

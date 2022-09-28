@@ -104,7 +104,7 @@ export default function AuctionNFT() {
         m.toString() +
         "m " +
         s.toString() +
-        "s"  + " left"
+        "s" + " left"
       );
     }
   }
@@ -133,13 +133,13 @@ export default function AuctionNFT() {
         setAccountAddress(window.accountId);
         setEventId(id); //setting Event id
         id = Number(id);
-        const valueAll = JSON.parse(await window.nearcontract.event_uri({event_id:id})) //Getting event URI from smart contract
-       
+        const valueAll = JSON.parse(await window.nearcontract.event_uri({ event_id: id })) //Getting event URI from smart contract
+
         const value = valueAll[1];
 
         const arr = [];
-        const totalTokens =JSON.parse(await window.nearcontract.get_token_search_from_event({event_id:id})); //Getting total NFTs of that event
-        let totalEarned = await window.nearcontract.get_event_raised({event_id:id}) ;
+        const totalTokens = JSON.parse(await window.nearcontract.get_token_search_from_event({ event_id: id })); //Getting total NFTs of that event
+        let totalEarned = await window.nearcontract.get_event_raised({ event_id: id });
         for (let i = 0; i < totalTokens.length; i++) {
           //Getting all NFTs
           const obj = await totalTokens[i];
@@ -147,15 +147,15 @@ export default function AuctionNFT() {
           let object = {};
           try {
             object = await JSON.parse(obj);
-          } catch {}
+          } catch { }
           if (object.title) {
             var pricedes1 = 0;
             try {
               pricedes1 = formatter.format(
                 Number(object.properties.price.description * 5.51)
               ); //Bid price in comma version
-            } catch (ex) {}
-            const TokenId = Number(await window.nearcontract.get_tokenid_from_uri({token_uri: obj})); //Getting NFT id from NFT URI
+            } catch (ex) { }
+            const TokenId = Number(await window.nearcontract.get_tokenid_from_uri({ token_uri: obj })); //Getting NFT id from NFT URI
 
             arr.push({
               Id: TokenId,
@@ -198,7 +198,7 @@ export default function AuctionNFT() {
         if (
           s.toString().includes("-") &&
           object.properties.wallet.description ===
-            window.walletConnection.getAccountId() &&
+          window.walletConnection.getAccountId() &&
           valueAll[2] !== "Finished"
         ) {
           console.log("should be");
@@ -225,11 +225,11 @@ export default function AuctionNFT() {
       var allDates = document.getElementsByName("date");
       for (let i = 0; i < allDates.length; i++) {
         var date = allDates[i].getAttribute("date");
-        if (date !== undefined && date !== "" ){
-          allDates[i].innerHTML = LeftDateBid(date) ;
+        if (date !== undefined && date !== "") {
+          allDates[i].innerHTML = LeftDateBid(date);
         }
       }
-    } catch (error) {}
+    } catch (error) { }
   }
 
   function activateViewBidModal(e) {
@@ -262,12 +262,12 @@ export default function AuctionNFT() {
     var distributeNFTBTN = document.getElementById("distributeNFTBTN");
     distributeNFTBTN.disabled = true;
     try {
-      await contract.DistributeToken(eventId);
+      //Calling smart contract method(functon) to Distribut in Smart Contract
+      await window.nearcontract.distribute_nft({ "event_id": Number(eventId) }, "60000000000000")
+
     } catch (error) {
       console.error(error);
     }
-    await sleep(5000);
-    window.location.reload();
   }
 
   return (
@@ -293,17 +293,15 @@ export default function AuctionNFT() {
         </div>
         <div className={`${styles.title} flex gap-4 justify-start`}>
           <a
-            className={`tab block px-3 cursor-pointer py-2 ${
-              selectTab === "overview" ? "active" : ""
-            }`}
+            className={`tab block px-3 cursor-pointer py-2 ${selectTab === "overview" ? "active" : ""
+              }`}
             onClick={() => setselectTab("overview")}
           >
             Overview
           </a>
           <a
-            className={`tab block cursor-pointer px-3 py-2 ${
-              selectTab === "nfts" ? "active" : ""
-            }`}
+            className={`tab block cursor-pointer px-3 py-2 ${selectTab === "nfts" ? "active" : ""
+              }`}
             onClick={() => setselectTab("nfts")}
           >
             Auction NFTs ({list.length})
@@ -340,26 +338,26 @@ export default function AuctionNFT() {
                           Distribute NFTs to highest bidders
                         </Button>
                       ) : EventEnd !== "Finished" ? (
-                        (selectedAddress !== AccountAddress)?(<>
-                            <>
-                          <Button
-                            data-element-id="btn_donate"
-                            data-analytic-event-listener="true"
-                            onClick={activateDonateNFTModal}
-                          >
-                            Donate NFT
-                          </Button>
-                          <Button
-                            variant="secondary"
-                            data-element-id="btn_donate"
-                            data-analytic-event-listener="true"
-                            onClick={activateDirectDonateModal}
-                          >
-                            Donate coin
-                          </Button>
-                        </>
-                        </>):(<></>)
-                    
+                        (selectedAddress !== AccountAddress) ? (<>
+                          <>
+                            <Button
+                              data-element-id="btn_donate"
+                              data-analytic-event-listener="true"
+                              onClick={activateDonateNFTModal}
+                            >
+                              Donate NFT
+                            </Button>
+                            <Button
+                              variant="secondary"
+                              data-element-id="btn_donate"
+                              data-analytic-event-listener="true"
+                              onClick={activateDirectDonateModal}
+                            >
+                              Donate coin
+                            </Button>
+                          </>
+                        </>) : (<></>)
+
                       ) : (
                         <p className="text-dodoria font-bold">
                           Auction has ended
@@ -413,31 +411,31 @@ export default function AuctionNFT() {
                         </span>
                       </p>
                       <div className="flex flex-col gap-2 items-center">
-                       
-                      {EventWaiting === false && EventEnd !== "Finished" ? (<>                      
-                        <Button
-                          tokenid={listItem.Id}
-                          highestbid={listItem.price}
-                          onClick={activateBidNFTModal}
-                          style={{ width: 240 }}
-                          iconLeft
-                        >
-                          <ControlsPlus className="text-moon-24" />
-                          <div
+
+                        {EventWaiting === false && EventEnd !== "Finished" ? (<>
+                          <Button
                             tokenid={listItem.Id}
                             highestbid={listItem.price}
-                            className="card BidcontainerCard"
+                            onClick={activateBidNFTModal}
+                            style={{ width: 240 }}
+                            iconLeft
                           >
+                            <ControlsPlus className="text-moon-24" />
                             <div
                               tokenid={listItem.Id}
                               highestbid={listItem.price}
-                              className="card-body bidbuttonText"
+                              className="card BidcontainerCard"
                             >
-                              Place higher bid
+                              <div
+                                tokenid={listItem.Id}
+                                highestbid={listItem.price}
+                                className="card-body bidbuttonText"
+                              >
+                                Place higher bid
+                              </div>
                             </div>
-                          </div>
-                        </Button>
-                        </>):(<></>)}
+                          </Button>
+                        </>) : (<></>)}
                         <Button
                           tokenid={listItem.Id}
                           title={listItem.name}

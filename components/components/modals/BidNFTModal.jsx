@@ -33,12 +33,6 @@ export default function BidNFTModal({
     placeholder: "Amount",
   });
 
-  function activateWarningModal(TextAlert) {
-    //Activating Warning Text
-    var alertELM = document.getElementById("alert");
-    alertELM.style = "contents";
-    setAlert(TextAlert);
-  }
   function activateWorkingModal(TextAlert) {
     //Activating Working Text
     var alertELM = document.getElementById("workingalert");
@@ -53,21 +47,21 @@ export default function BidNFTModal({
     BidNFTBTN.disabled = true;
     if (Number(Amount) < Number(Highestbid)) {
       // If given bid price is less than highest bid
-      activateWarningModal(`Amount cannot be under ${Highestbid} NEAR`);
+      activateWorkingModal(`Amount cannot be under ${Highestbid} NEAR`);
       return;
     } else {
       var alertELM = document.getElementById("alert");
       alertELM.style.display = "none";
     }
     try {
-      
-      const tokenUri = await window.nearcontract.get_tokenuri_from_id({token_id:Number(tokenId)}) ;
+
+      const tokenUri = await window.nearcontract.get_tokenuri_from_id({ token_id: Number(tokenId) });
       var parsed = await JSON.parse(tokenUri);
       if (
         Number(parsed["properties"]["price"]["description"]) < Number(Amount)
       ) {
         parsed["properties"]["price"]["description"] = Amount;
-        parsed["properties"]["higherbidadd"]["description"] =walletConnection.getAccountId();
+        parsed["properties"]["higherbidadd"]["description"] = walletConnection.getAccountId();
       }
       let currentDate = new Date();
       const createdObject = {
@@ -89,19 +83,18 @@ export default function BidNFTModal({
         },
       };
       activateWorkingModal("Please confirm creating Bid...");
-      const totalraised =await window.nearcontract.get_event_raised({event_id:Number(eventId)});
+      const totalraised = await window.nearcontract.get_event_raised({ event_id: Number(eventId) });
       let Raised = 0;
       Raised = Number(totalraised) + Number(Amount);
       //Calling smart contract method(functon) to store in to Smart Contract
-        
+
       activateWorkingModal("Bidding...."); // Bidding on NEAR
-      await window.nearcontract.bid_nft({"_token_id":Number(tokenId),"_bid_uri":JSON.stringify(createdObject),"_updated_uri":JSON.stringify(parsed),"_highest_bidder":walletConnection.getAccountId(),"_eventid":Number(eventId),"_raised":Raised.toString()}, "60000000000000",nearAPI.utils.format.parseNearAmount(Amount).toString())
-   
+      await window.nearcontract.bid_nft({ "_token_id": Number(tokenId), "_bid_uri": JSON.stringify(createdObject), "_updated_uri": JSON.stringify(parsed), "_highest_bidder": walletConnection.getAccountId(), "_eventid": Number(eventId), "_raised": Raised.toString() }, "60000000000000", nearAPI.utils.format.parseNearAmount(Amount).toString())
+
       BidNFTBTN.disabled = false;
       // window.location.reload();
     } catch (e) {
       console.error(e);
-      // activateWarningModal(`Error! Please try again!`);
       var alertELM = document.getElementById("workingalert");
       alertELM.style.display = "none";
       BidNFTBTN.disabled = false;
@@ -133,20 +126,7 @@ export default function BidNFTModal({
     >
       <div className="p-6 flex flex-col gap-6">
         <Form className="flex flex-col gap-6">
-          <div
-            id="alert"
-            style={{ display: "none", fontSize: "30px" }}
-            className="text-dodoria bg-goku p-4 rounded-lg"
-            role="alert"
-          >
-            {Alert}
-          </div>
-          <div
-            id="workingalert"
-            style={{ display: "none", fontSize: "30px" }}
-            className="text-roshi bg-hit p-4 rounded-lg"
-            role="alert"
-          >
+          <div id="workingalert" style={{ display: "none", background: '#cce5ff' }} className="rounded flex flex-row items-center justify-center text-3xl p-3" role="alert">
             {Alert}
           </div>
           <Form.Group controlId="formGroupName">
