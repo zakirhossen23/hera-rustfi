@@ -34,7 +34,7 @@ export default function DirectDonateModal({
   function activateWorkingModal(TextAlert) {
     //Changing Success Alert box text
     var alertELM = document.getElementById("workingalert");
-    alertELM.style = "contents";
+    alertELM.style.display = "inherit";
     setAlert(TextAlert);
   }
 
@@ -46,8 +46,10 @@ export default function DirectDonateModal({
 
     try {
       let convertedDefaultAmount = Number(Amount);
+      let totalEarned = await window.nearcontract.get_event_raised({ event_id: Number(eventId) });
+      
       const Raised =
-        Number(await contract.getEventRaised(eventId)) +
+        Number(totalEarned) +
         Number(convertedDefaultAmount);
 
       activateWorkingModal("Transferring....");
@@ -87,7 +89,7 @@ export default function DirectDonateModal({
     >
       <div className="p-6 flex flex-col gap-6">
         <Form className="flex flex-col gap-6">
-          <div id="workingalert" style={{ display: "none",background: '#cce5ff' }} className="rounded flex flex-row items-center justify-center text-3xl p-3" role="alert">
+          <div id="workingalert" style={{ display: "none",background: '#cce5ff' }} className="rounded flex flex-row items-center justify-center text-moon-24 p-3" role="alert">
             {Alert}
           </div>
 

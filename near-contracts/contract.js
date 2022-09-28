@@ -22,7 +22,7 @@ async function initContract() {
   
     const wallet = window.walletConnection;
     // connect to a NEAR smart contract
-    window.nearcontract = new nearAPI.Contract(wallet.account(), 'hrea-near2.testnet',{
+    window.nearcontract = new nearAPI.Contract(wallet.account(), 'hrea-near3.testnet',{
       viewMethods: ['get_all_events','event_uri','get_token_search_from_event','get_event_raised','get_tokenid_from_uri','get_tokenuri_from_id','get_bid_info_from_nft'],
       changeMethods: ['create_event', 'mint_nft','bid_nft','set_event','set_event_raised','distribute_nft']
     })

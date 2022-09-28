@@ -843,12 +843,12 @@ video {
   margin-bottom: 0.5rem;
 }
 
-.mb-3 {
-  margin-bottom: 0.75rem;
-}
-
 .mb-2 {
   margin-bottom: 0.5rem;
+}
+
+.mb-3 {
+  margin-bottom: 0.75rem;
 }
 
 .mt-3 {
@@ -1237,20 +1237,16 @@ video {
   gap: 1.5rem;
 }
 
-.gap-10 {
-  gap: 2.5rem;
-}
-
-.gap-3 {
-  gap: 0.75rem;
+.gap-1 {
+  gap: 0.25rem;
 }
 
 .gap-5 {
   gap: 1.25rem;
 }
 
-.gap-1 {
-  gap: 0.25rem;
+.gap-3 {
+  gap: 0.75rem;
 }
 
 .overflow-hidden {
@@ -1289,6 +1285,10 @@ video {
 
 .rounded-moon-s-lg {
   border-radius: var(--radius-s-lg);
+}
+
+.rounded {
+  border-radius: 0.25rem;
 }
 
 .rounded-lg {
@@ -1386,6 +1386,11 @@ video {
   border-left-color: transparent;
 }
 
+.bg-beerus {
+  --tw-bg-opacity: 1;
+  background-color: rgb(var(--beerus) / var(--tw-bg-opacity));
+}
+
 .bg-gohan {
   --tw-bg-opacity: 1;
   background-color: rgb(var(--gohan) / var(--tw-bg-opacity));
@@ -1394,16 +1399,6 @@ video {
 .bg-goku {
   --tw-bg-opacity: 1;
   background-color: rgb(var(--goku) / var(--tw-bg-opacity));
-}
-
-.bg-hit {
-  --tw-bg-opacity: 1;
-  background-color: rgb(var(--hit) / var(--tw-bg-opacity));
-}
-
-.bg-beerus {
-  --tw-bg-opacity: 1;
-  background-color: rgb(var(--beerus) / var(--tw-bg-opacity));
 }
 
 .bg-bulma\/\[\.07\] {
@@ -1442,11 +1437,6 @@ video {
   background-color: rgb(var(--chichi) / var(--tw-bg-opacity));
 }
 
-.bg-trunks {
-  --tw-bg-opacity: 1;
-  background-color: rgb(var(--trunks) / var(--tw-bg-opacity));
-}
-
 .bg-contain {
   background-size: contain;
 }
@@ -1472,10 +1462,6 @@ video {
   padding: 2.5rem;
 }
 
-.p-1 {
-  padding: 0.25rem;
-}
-
 .p-4 {
   padding: 1rem;
 }
@@ -1486,6 +1472,10 @@ video {
 
 .p-3 {
   padding: 0.75rem;
+}
+
+.p-1 {
+  padding: 0.25rem;
 }
 
 .p-2 {
@@ -1578,10 +1568,6 @@ video {
   padding-bottom: 0.5rem;
 }
 
-.pb-3 {
-  padding-bottom: 0.75rem;
-}
-
 .pt-\[1\.125rem\] {
   padding-top: 1.125rem;
 }
@@ -1627,6 +1613,11 @@ video {
 
 .text-\[1rem\] {
   font-size: 1rem;
+}
+
+.text-3xl {
+  font-size: 1.875rem;
+  line-height: 2.25rem;
 }
 
 .text-moon-64 {
@@ -1725,19 +1716,14 @@ video {
   color: rgb(var(--hit) / var(--tw-text-opacity));
 }
 
-.text-bulma {
-  --tw-text-opacity: 1;
-  color: rgb(var(--bulma) / var(--tw-text-opacity));
-}
-
 .text-dodoria {
   --tw-text-opacity: 1;
   color: rgb(var(--dodoria) / var(--tw-text-opacity));
 }
 
-.text-roshi {
+.text-bulma {
   --tw-text-opacity: 1;
-  color: rgb(var(--roshi) / var(--tw-text-opacity));
+  color: rgb(var(--bulma) / var(--tw-text-opacity));
 }
 
 .text-gohan {

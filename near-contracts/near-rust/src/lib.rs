@@ -26,12 +26,17 @@ use std::collections::HashMap;
 #[derive(BorshDeserialize, BorshSerialize)]
 pub struct Contract {
   //Variables
-  _token_uris: HashMap<i32, Vec<String>>,           //_TOKEN_IDS 	     => Token URI 	 + Highest Bidder
-  _event_raised: HashMap<i32, String>,              //_EVENT_IDS 	     => Raised
-  _event_uris: HashMap<i32, Vec<String>>,           //_EVENT_IDS       => Event Wallet + Event URI + Finished
-  all_event_tokens: HashMap<i32, Vec<String>>,      //_EVENT_TOKEN_ID  => Event ID + Token URI
-  all_tokens_bids: HashMap<i32, Vec<String>>,       //_TOKEN_BID_ID    => TokenID + BidURI
-  all_user_tokens: HashMap<i32, Vec<String>>,       //_USER_TOKEN_ID   => User Address+ TokenID + Gifted
+  _event_ids: i32,
+  _token_ids: i32,
+  _event_token_id: i32,
+  _token_bid_id: i32,
+  _user_token_id:i32,
+  _token_uris: HashMap<i32, Vec<String>>,           //_token_ids 	     => Token URI 	 + Highest Bidder
+  _event_raised: HashMap<i32, String>,              //_event_ids 	     => Raised
+  _event_uris: HashMap<i32, Vec<String>>,           //_event_ids       => Event Wallet + Event URI + Finished
+  all_event_tokens: HashMap<i32, Vec<String>>,      //_event_token_id  => Event ID + Token URI
+  all_tokens_bids: HashMap<i32, Vec<String>>,       //_token_bid_id    => TokenID + BidURI
+  all_user_tokens: HashMap<i32, Vec<String>>,       //_user_token_id   => User Address+ TokenID + Gifted
 
   recent_contributions: Vec<(AccountId, Balance)>,
   recent_receivers: HashMap<AccountId, u64>,
@@ -42,6 +47,11 @@ pub struct Contract {
 impl Default for Contract {
   fn default() -> Self {
     Self {
+      _event_ids : 0,
+      _token_ids: 0,
+      _event_token_id: 0,
+      _token_bid_id:0,
+      _user_token_id:0,
       //Variables
       _token_uris: HashMap::new(),
       _event_raised: HashMap::new(),
@@ -58,11 +68,6 @@ impl Default for Contract {
   }
 }
 
-static mut _TOKEN_IDS: i32 = 0;
-static mut _EVENT_IDS: i32 = 0;
-static mut _EVENT_TOKEN_ID: i32 = 0;
-static mut _TOKEN_BID_ID: i32 = 0;
-static mut _USER_TOKEN_ID: i32 = 0;
 
 
 #[near_bindgen]
@@ -73,20 +78,18 @@ impl Contract {
     let mut stuff_nft : Vec<String> = Vec::new();
     stuff_nft.push(nft_metadata.to_string());
     stuff_nft.push(String::from(""));
-    self._token_uris.insert(unsafe { _TOKEN_IDS }, stuff_nft);
+    self._token_uris.insert(self._token_ids, stuff_nft);
 
     //Inserting Event ID + NFT Metadata into All Event Token variable
     let mut stuff : Vec<String> = Vec::new();
     stuff.push(event_id.to_string());
     stuff.push(nft_metadata.to_string());
-    self.all_event_tokens.insert(unsafe { _EVENT_TOKEN_ID },stuff);
+    self.all_event_tokens.insert(self._event_token_id,stuff);
 
     //Incrementing Variables
-    unsafe {
-      _TOKEN_IDS += 1;
-      _EVENT_TOKEN_ID += 1;
-    }
-    return unsafe { _TOKEN_IDS };
+    self._token_ids += 1;
+    self._event_token_id +=1;
+    return self._token_ids ;
   }
 
   pub fn get_tokenid_from_uri(&self,token_uri:String)-> i32{
@@ -112,16 +115,16 @@ impl Contract {
     self._token_uris.get_mut(_token_id).unwrap()[1] = (*_highest_bidder).to_string();
     self.all_event_tokens.get_mut(&event_token_id).unwrap()[0] = (*_eventid).to_string();
     self.all_event_tokens.get_mut(&event_token_id).unwrap()[1] = (*_updated_uri).to_string();
-    *self._event_raised.get_mut(_token_id).unwrap() = (*_raised).to_string();
-    *self._event_raised.get_mut(_token_id).unwrap() = (*_raised).to_string();
-    
+
+    *self._event_raised.get_mut(_eventid).unwrap() = (*_raised).to_string();
+
     let mut stuff : Vec<String> = Vec::new();
     stuff.push(_token_id.to_string());
     stuff.push(_bid_uri.to_string());
 
-    unsafe {
-    self.all_tokens_bids.insert(_TOKEN_BID_ID,stuff);
-    _TOKEN_BID_ID += 1;}
+    
+    self.all_tokens_bids.insert(self._token_bid_id,stuff);
+    self._token_bid_id += 1;
   }
 
   pub fn get_bid_info_from_nft(&self,token_id:&i32)-> String{
@@ -144,10 +147,10 @@ impl Contract {
     stuff.push(_event_uri.to_string());
     stuff.push("False".to_string());
 
-    self._event_uris.insert(unsafe { _EVENT_IDS },stuff);
-    self._event_raised.insert(unsafe { _EVENT_IDS },String::from("0"));
-    unsafe {_EVENT_IDS += 1;}
-    return unsafe { _EVENT_IDS };
+    self._event_uris.insert(self._event_uris.len() as i32,stuff);
+    self._event_raised.insert(self._event_raised.len() as i32,String::from("0"));
+    self._event_ids += 1;
+    return self._event_ids ;
   }
 
   pub fn set_event(&mut self, _event_id: &i32, _event_wallet: String,_event_uri: String) {
@@ -203,17 +206,16 @@ impl Contract {
       .filter(|(_id, value)| value[0].to_string() == event_id.to_string()).collect();
       let token_uris_list:Vec<&String> = new.iter().map(|(_id,value)| {return &value[1]} ).collect();
       for value in token_uris_list {
-       let token_id_one:i32 = self.get_tokenid_from_uri(value.to_string());
-       let highest_bidder:String = self._token_uris.get(&token_id_one).unwrap()[1].to_string();
-
+        let token_id_one:i32 = self.get_tokenid_from_uri(value.to_string());
+        let highest_bidder:String = self._token_uris.get(&token_id_one).unwrap()[1].to_string();
        //Inserting User Address+ TokenID + Gifted into All User Token variable
        let mut stuff : Vec<String> = Vec::new();
        stuff.push(highest_bidder.to_string());
        stuff.push(token_id_one.to_string());
        stuff.push(String::from("False"));
-       self.all_user_tokens.insert(unsafe { _USER_TOKEN_ID },stuff);
+       self.all_user_tokens.insert(self._user_token_id ,stuff);
+       self._user_token_id += 1; 
       }
-      unsafe { _USER_TOKEN_ID += 1; }
   }
 
   
@@ -305,24 +307,25 @@ impl Contract {
 
 #[cfg(test)]
 
-// Creating Event Test
-#[test]
-fn test_create_event() {
-    let mut contract = Contract::default();
+// // All Tests
+// #[test]
+// fn test_create_event() {
+//     let mut contract = Contract::default();
   
-    contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
+//     contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
+//     contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
   
-    // println!("All Events List         => {}",contract.get_all_events());
-    // println!("Event Event 0 => {:#?}",contract._event_uris.get(&0));
+//     // println!("All Events List         => {}",contract.get_all_events());
+//     // println!("Event Event 0 => {:#?}",contract._event_uris.get(&0));
     
-    contract.set_event(&0,String::from("account1.wallet"),String::from("metadata -v1"));
-    contract.set_event_raised(&0,String::from("20"));
-    // println!("Event raised of Event 0 => {}",contract.get_event_raised(&0));
-    // println!("Event Event 0 => {:#?}",contract._event_uris.get(&0));
-    // let get_event_uri = contract._event_uris.get(&0);    
-    // let unwraped = get_event_uri.unwrap();    
-    // assert_eq!(unwraped[1], "Event metadata #1");
-  }
+//     // contract.set_event(&0,String::from("account1.wallet"),String::from("metadata -v1"));
+//     // contract.set_event_raised(&0,String::from("20"));
+//     // println!("Event raised of Event 0 => {}",contract.get_event_raised(&0));
+//     println!("Event Event 0 => {:#?}",contract.get_all_events());
+//     // let get_event_uri = contract._event_uris.get(&0);    
+//     // let unwraped = get_event_uri.unwrap();    
+//     // assert_eq!(unwraped[1], "Event metadata #1");
+//   }
   
 //   // NFT minting Test
 // #[test]
@@ -335,7 +338,7 @@ fn test_create_event() {
 
 //   // println!("Token id                   => {:#?}", contract.get_tokenid_from_uri(String::from("NFT metadata #2")));
 //   // println!("Token Uri                  => {:#?}", contract.get_tokenuri_from_id(&0));
-//   // println!("\nAll Tokens inside Event 1  => {:#?}", contract.get_token_search_from_event(&0));
+//   // println!("\nAll Tokens inside Event 1  => {:#?}", contract.get_token_search_from_event(&1));
 
 
 //   // assert_eq!(contract._token_uris.get(&1), None);
@@ -346,7 +349,7 @@ fn test_create_event() {
 //   let mut contract = Contract::default();
 //   contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
 //   contract.mint_nft(String::from("NFT metadata #1"), &0);
-//   // println!("\nAll Tokens inside Event 1  => {:#?}", contract.get_token_search_from_event(&0));
+//   // println!("\nAll Tokens inside Event 1  => {:#?}", contract._event_raised);
 
 //   contract.bid_nft(&0,String::from("{BId metadata #1}"),String::from("NFT made bid metadata #1 of 200"),String::from("highestbidder.testnet"),&0,String::from("200"));
 
@@ -359,20 +362,21 @@ fn test_create_event() {
 //   // assert_eq!(contract._token_uris.get(&1), None);
 // }
 
-// #[test]
-// fn test_distribute_nft() {
-//   let mut contract = Contract::default();
+#[test]
+fn test_distribute_nft() {
+  let mut contract = Contract::default();
   
-//   contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));  
-//   contract.mint_nft(String::from("NFT metadata #1"), &0);
-//   contract.mint_nft(String::from("NFT metadata #2"), &0);
-//   contract.mint_nft(String::from("NFT metadata #23"), &1);
-//   contract.bid_nft(&0,String::from("{BId metadata #1}"),String::from("NFT made bid metadata #1 of 200"),String::from("highestbidder.testnet"),&0,String::from("200"));
+  contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));  
+  contract.mint_nft(String::from("NFT metadata #1"), &0);
+  contract.mint_nft(String::from("NFT metadata #2"), &0);
+  contract.mint_nft(String::from("NFT metadata #23"), &1);
+  contract.bid_nft(&0,String::from("{BId metadata #1}"),String::from("NFT made bid metadata #1 of 200"),String::from("highestbidder.testnet"),&0,String::from("200"));
+  contract.bid_nft(&1,String::from("{BId metadata #2}"),String::from("NFT made bid metadata #2 of 200"),String::from("highestbidder2.testnet"),&0,String::from("300"));
 
 
-//   contract.distribute_nft(&0);
-//   // println!("\nAll User Tokens  => {:#?}",contract.all_user_tokens);
+  contract.distribute_nft(&0);
+  // println!("\nAll User Tokens  => {:#?}",contract.all_user_tokens);
 
 
-//   // assert_eq!(contract._token_uris.get(&1), None);
-// }
+  // assert_eq!(contract._token_uris.get(&1), None);
+}

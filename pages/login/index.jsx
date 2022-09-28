@@ -128,6 +128,7 @@ export default function Login() {
     }
   }
   async function onClickConnectNear() {
+    // 'hera-near.testnet',
     window.walletConnection.requestSignIn(
       'hera-near.testnet',
       'Hera'

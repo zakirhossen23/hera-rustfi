@@ -36,7 +36,7 @@ export default function BidNFTModal({
   function activateWorkingModal(TextAlert) {
     //Activating Working Text
     var alertELM = document.getElementById("workingalert");
-    alertELM.style = "contents";
+    alertELM.style.display = "inherit";
     setAlert(TextAlert);
   }
 
@@ -50,7 +50,7 @@ export default function BidNFTModal({
       activateWorkingModal(`Amount cannot be under ${Highestbid} NEAR`);
       return;
     } else {
-      var alertELM = document.getElementById("alert");
+      var alertELM = document.getElementById("workingalert");
       alertELM.style.display = "none";
     }
     try {
@@ -82,7 +82,6 @@ export default function BidNFTModal({
           },
         },
       };
-      activateWorkingModal("Please confirm creating Bid...");
       const totalraised = await window.nearcontract.get_event_raised({ event_id: Number(eventId) });
       let Raised = 0;
       Raised = Number(totalraised) + Number(Amount);
@@ -126,7 +125,7 @@ export default function BidNFTModal({
     >
       <div className="p-6 flex flex-col gap-6">
         <Form className="flex flex-col gap-6">
-          <div id="workingalert" style={{ display: "none", background: '#cce5ff' }} className="rounded flex flex-row items-center justify-center text-3xl p-3" role="alert">
+          <div id="workingalert" style={{ display: "none", background: '#cce5ff' }} className="rounded flex flex-row items-center justify-center text-moon-24 p-3" role="alert">
             {Alert}
           </div>
           <Form.Group controlId="formGroupName">

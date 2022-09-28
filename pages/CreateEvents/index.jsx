@@ -134,14 +134,15 @@ export default function CreateEvents() {
     };
     console.log("======================>Creating Event");
     try {
-
+      const valueAll = JSON.parse(await window.nearcontract.get_all_events({})) //Getting event URI from smart contract       
+   
        // //Getting the event id of new one
-      // let eventid = await contract.totalEvent();
-      // if (document.getElementById("plugin").checked) {
-      //   await CreatePlugin(
-      //     `http://${window.location.host}/donation/auction?[${eventid}]`
-      //   );
-      // }
+      let eventid = Object.keys(valueAll).length;
+      if (document.getElementById("plugin").checked) {
+        await CreatePlugin(
+          `http://${window.location.host}/donation/auction?[${eventid}]`
+        );
+      }
 
       // Creating Event in Rust Smart contract
       await window.nearcontract.create_event({"_event_wallet":window.walletConnection.getAccountId(),"_event_uri":JSON.stringify(createdObject)}, "60000000000000")
@@ -304,7 +305,7 @@ export default function CreateEvents() {
           </div>
 
           <div>
-            <Checkbox label="Generate Plugin" hidden id="plugin" />
+            <Checkbox label="Generate Plugin"  id="plugin" />
           </div>
           <CreateEventBTN />
         </div>
