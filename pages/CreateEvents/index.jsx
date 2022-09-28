@@ -61,6 +61,7 @@ export default function CreateEvents() {
     link.click();
     document.body.removeChild(link);
   }
+  CheckTransaction();
 
   //Creating plugin function
   async function CreatePlugin(src) {
@@ -72,6 +73,13 @@ export default function CreateEvents() {
     console.log(output);
   }
 
+  async function CheckTransaction(){
+    let params = (new URL(window.location)).searchParams;
+    if (params.get("transactionHashes") !==null){
+      window.location.href="/donation";
+    }
+
+  }
   //Function after clicking Create Event Button
   async function createEvent() {
     var CreateEVENTBTN = document.getElementById("CreateEVENTBTN");
@@ -126,17 +134,20 @@ export default function CreateEvents() {
     };
     console.log("======================>Creating Event");
     try {
-      // Creating Event in Rust Smart contract
-      window.nearcontract.create_event({"_event_wallet":window.walletConnection.getAccountId(),"_event_uri":JSON.stringify(createdObject)}, "60000000000000")
-  
 
-      // //Getting the event id of new one
+       // //Getting the event id of new one
       // let eventid = await contract.totalEvent();
       // if (document.getElementById("plugin").checked) {
       //   await CreatePlugin(
       //     `http://${window.location.host}/donation/auction?[${eventid}]`
       //   );
       // }
+
+      // Creating Event in Rust Smart contract
+      await window.nearcontract.create_event({"_event_wallet":window.walletConnection.getAccountId(),"_event_uri":JSON.stringify(createdObject)}, "60000000000000")
+  
+
+     
     } catch (error) {
       console.error(error);
       window.location.href = "/login?[/]"; //If found any error then it will let the user to login page

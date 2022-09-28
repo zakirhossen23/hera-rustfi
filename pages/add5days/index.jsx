@@ -1,29 +1,25 @@
 import React from "react";
 import Head from "next/head";
 import { Button } from "@heathmont/moon-core-tw";
-import useContract from "../../services/useContract";
+import Form from "react-bootstrap/Form";
 import { Header } from "../../components/layout/Header";
-import NavLink from "next/link";
-import Web3 from "web3";
+import UseFormInput from "../../components/components/UseFormInput";
 export default function Add5DaysFORM() {
-  const { contract, signerAddress } = useContract("ERC725");
-
+  const [eventid, EventidInput] = UseFormInput({
+    type: "text",
+    placeholder: "Enter Event ID",
+  });
   async function Adding5Days() {
-    const web3 = new Web3(window.ethereum);
-    const account = await web3.eth.getAccounts();
+    const valueAll = JSON.parse(await window.nearcontract.event_uri({event_id:Number(eventid)})) //Getting event URI from smart contract       
+    const value = valueAll[1];
+    if (value) {
+      const object = JSON.parse(value);
+      var c = new Date(object.properties.Date.description);
+      c.setDate(c.getDate() - 5);
+      object.properties.Date.description = c.toISOString();
 
-    const totalEvent = await contract.totalEvent();
-    for (let i = 0; i < Number(totalEvent); i++) {
-      const valueAll = await contract.eventURI(i);
-      const value = valueAll[1];
-      if (value) {
-        const object = JSON.parse(value);
-        var c = new Date(object.properties.Date.description);
-        c.setDate(c.getDate() - 5);
-        object.properties.Date.description = c.toISOString();
+      await window.nearcontract.set_event({ "_event_id": Number(eventid), "_event_wallet": valueAll[0], "_event_uri": JSON.stringify(object) }, "60000000000000")
 
-        await contract._setEventURI(i, valueAll[0], JSON.stringify(object));
-      }
     }
   }
 
@@ -48,6 +44,7 @@ export default function Add5DaysFORM() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <Header></Header>
+
       <div className="row" style={{ height: "100vh", paddingTop: 140 }}>
         <div className="createevents col">
           <div
@@ -59,6 +56,10 @@ export default function Add5DaysFORM() {
               border: "white solid",
             }}
           >
+            <Form.Group controlId="formGroupName">
+              <div className="mb-2">Event id</div>
+              {EventidInput}
+            </Form.Group>
             <Add5DaysBTN />
           </div>
         </div>

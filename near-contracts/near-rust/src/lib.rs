@@ -147,6 +147,12 @@ impl Contract {
     return unsafe { _EVENT_IDS };
   }
 
+  pub fn set_event(&mut self, _event_id: &i32, _event_wallet: String,_event_uri: String) {
+    self._event_uris.get_mut(_event_id).unwrap()[0] = (*_event_wallet).to_string();
+    self._event_uris.get_mut(_event_id).unwrap()[1] = (*_event_uri).to_string(); 
+  }
+
+
   pub fn get_all_events(&self)-> String{
     let json = serde_json::to_string(&self._event_uris).unwrap();
     return json;
@@ -277,51 +283,55 @@ impl Contract {
 
 
 // Creating Event Test
-// #[test]
-// fn test_create_event() {
-//     let mut contract = Contract::default();
-  
-//     contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
-  
-//     // println!("All Events List         => {}",contract.get_all_events());
-//     // println!("Event raised of Event 0 => {}",contract.get_event_raised(&0));
-    
-//     // let get_event_uri = contract._event_uris.get(&0);    
-//     // let unwraped = get_event_uri.unwrap();    
-//     // assert_eq!(unwraped[1], "Event metadata #1");
-//   }
-  
-//   // NFT minting Test
-// #[test]
-// fn test_mint_token() {
-//   let mut contract = Contract::default();
-
-//   contract.mint_nft(String::from("NFT metadata #1"), &0);
-//   contract.mint_nft(String::from("NFT metadata #2"), &1);
-//   contract.mint_nft(String::from("NFT metadata #23"), &1);
-
-//   // println!("Token id                   => {:#?}", contract.get_tokenid_from_uri(String::from("NFT metadata #2")));
-//   // println!("Token Uri                  => {:#?}", contract.get_tokenuri_from_id(&0));
-//   println!("\nAll Tokens inside Event 1  => {:#?}", contract.get_token_search_from_event(&0));
-
-
-//   // assert_eq!(contract._token_uris.get(&1), None);
-// }
-  
 #[test]
-fn test_bid_nft() {
+fn test_create_event() {
+    let mut contract = Contract::default();
+  
+    contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
+  
+    // println!("All Events List         => {}",contract.get_all_events());
+    println!("Event Event 0 => {:#?}",contract._event_uris.get(&0));
+    
+    contract.set_event(&0,String::from("account1.wallet"),String::from("metadata -v1"));
+    
+    // println!("Event raised of Event 0 => {}",contract.get_event_raised(&0));
+    // println!("Event Event 0 => {:#?}",contract._event_uris.get(&0));
+    // let get_event_uri = contract._event_uris.get(&0);    
+    // let unwraped = get_event_uri.unwrap();    
+    // assert_eq!(unwraped[1], "Event metadata #1");
+  }
+  
+  // NFT minting Test
+#[test]
+fn test_mint_token() {
   let mut contract = Contract::default();
-  contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
+
   contract.mint_nft(String::from("NFT metadata #1"), &0);
+  contract.mint_nft(String::from("NFT metadata #2"), &1);
+  contract.mint_nft(String::from("NFT metadata #23"), &1);
+
+  // println!("Token id                   => {:#?}", contract.get_tokenid_from_uri(String::from("NFT metadata #2")));
+  // println!("Token Uri                  => {:#?}", contract.get_tokenuri_from_id(&0));
   // println!("\nAll Tokens inside Event 1  => {:#?}", contract.get_token_search_from_event(&0));
-
-  contract.bid_nft(&0,String::from("{BId metadata #1}"),String::from("NFT made bid metadata #1 of 200"),String::from("highestbidder.testnet"),&0,String::from("200"));
-
-  // println!("\nAll Tokens inside Event 1  => {:#?}", contract._token_uris.get(&0));
-  // println!("\nAll Tokens inside Event 1  => {:#?}", contract.get_token_search_from_event(&0));
-
-  // println!("\nAll bid info of Token 1  => {:#?}",contract.get_bid_info_from_nft(&0));
 
 
   // assert_eq!(contract._token_uris.get(&1), None);
 }
+  
+// #[test]
+// fn test_bid_nft() {
+//   let mut contract = Contract::default();
+//   contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
+//   contract.mint_nft(String::from("NFT metadata #1"), &0);
+//   // println!("\nAll Tokens inside Event 1  => {:#?}", contract.get_token_search_from_event(&0));
+
+//   contract.bid_nft(&0,String::from("{BId metadata #1}"),String::from("NFT made bid metadata #1 of 200"),String::from("highestbidder.testnet"),&0,String::from("200"));
+
+//   // println!("\nAll Tokens inside Event 1  => {:#?}", contract._token_uris.get(&0));
+//   // println!("\nAll Tokens inside Event 1  => {:#?}", contract.get_token_search_from_event(&0));
+
+//   // println!("\nAll bid info of Token 1  => {:#?}",contract.get_bid_info_from_nft(&0));
+
+
+//   // assert_eq!(contract._token_uris.get(&1), None);
+// }
