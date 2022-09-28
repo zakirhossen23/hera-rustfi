@@ -27,7 +27,9 @@ use std::collections::HashMap;
 pub struct Contract {
   //Variables
   _token_uris: HashMap<i32, String>,
-  _event_uris: HashMap<i32, Vec<String>>,      //_EVENT_IDS     => Event Wallet + Event URI + Finished
+  _event_uris: HashMap<i32, Vec<String>>,           //_EVENT_IDS       => Event Wallet + Event URI + Finished
+  all_event_tokens: HashMap<i32, Vec<String>>,      //_EVENT_TOKEN_ID  => Event ID + Token URI
+
 
   recent_contributions: Vec<(AccountId, Balance)>,
   recent_receivers: HashMap<AccountId, u64>,
@@ -41,6 +43,7 @@ impl Default for Contract {
       //Variables
       _token_uris: HashMap::new(),
       _event_uris: HashMap::new(), 
+      all_event_tokens:HashMap::new(), 
 
       recent_contributions: Vec::new(),
       recent_receivers: HashMap::new(),
@@ -57,11 +60,20 @@ static mut _EVENT_TOKEN_ID: i32 = 0;
 
 #[near_bindgen]
 impl Contract {
-    //Mint NFT
-  pub fn mint_nft(&mut self, nft_metadata: String) -> i32 {
+  pub fn mint_nft(&mut self, nft_metadata: String,event_id:&i32) -> i32 { //Mint NFT
+    //Inserting NFT metadata in Token URIs
     self._token_uris.insert(unsafe { _TOKEN_IDS }, nft_metadata.to_string());
+
+    //Inserting Event ID + NFT Metadata into All Event Token variable
+    let mut stuff : Vec<String> = Vec::new();
+    stuff.push(event_id.to_string());
+    stuff.push(nft_metadata.to_string());
+    self.all_event_tokens.insert(unsafe { _EVENT_TOKEN_ID },stuff);
+
+    //Incrementing Variables
     unsafe {
       _TOKEN_IDS += 1;
+      _EVENT_TOKEN_ID += 1;
     }
     return unsafe { _TOKEN_IDS };
   }
@@ -87,9 +99,17 @@ impl Contract {
     return json;
   }
 
+  pub fn get_token_search_from_event(&self,event_id:&i32)-> String{
+    //Filtering all the event id contains Tokens
+    let new: HashMap<&i32, &Vec<String>> =  self.all_event_tokens.iter()
+    .filter(|(_id, value)| value[0].to_string() == event_id.to_string()).collect();
 
+    //Getting only the token URIs from the filtered
+    let token_uris_list:Vec<&String> = new.iter().map(|(_id,value)| {return &value[1]} ).collect();
 
-  
+    return serde_json::to_string(&token_uris_list).unwrap();
+  }
+
   pub fn request_funds(&mut self, receiver_id: AccountId, amount: U128) {
     // check if predecessor is in the blacklist
     require!(
@@ -177,14 +197,7 @@ impl Contract {
 
 #[cfg(test)]
 
-// NFT minting Test
-#[test]
-fn test_mint_token() {
-  let mut contract = Contract::default();
 
-  contract.mint_nft(String::from("NFT metadata #1"));
-  assert_eq!(contract._token_uris.get(&1), None);
-}
 
 // Creating Event Test
 #[test]
@@ -193,7 +206,6 @@ fn test_create_event() {
   
     contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
   
-    // println!("{}",contract.event_uri(&0));
     // println!("{}",contract.get_all_events());
 
 
@@ -204,5 +216,18 @@ fn test_create_event() {
     // assert_eq!(unwraped[1], "Event metadata #1");
   }
   
-  
+  // NFT minting Test
+#[test]
+fn test_mint_token() {
+  let mut contract = Contract::default();
+
+  contract.mint_nft(String::from("NFT metadata #1"), &0);
+  contract.mint_nft(String::from("NFT metadata #2"), &1);
+  contract.mint_nft(String::from("NFT metadata #23"), &1);
+  // println!("{:#?}", contract.all_event_tokens.get(&0));
+  println!("{:#?}", contract.get_token_search_from_event(&1));
+
+
+  // assert_eq!(contract._token_uris.get(&1), None);
+}
   

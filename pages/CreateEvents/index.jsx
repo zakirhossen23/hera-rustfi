@@ -141,8 +141,6 @@ export default function CreateEvents() {
       console.error(error);
       window.location.href = "/login?[/]"; //If found any error then it will let the user to login page
     }
-    // window.location.href = "/donation"; //If it created sucessfully then it will redirect to donation
-    // CreateEVENTBTN.disabled = false;
   }
 
   function CreateEventBTN() {
@@ -295,7 +293,7 @@ export default function CreateEvents() {
           </div>
 
           <div>
-            <Checkbox label="Generate Plugin" id="plugin" />
+            <Checkbox label="Generate Plugin" hidden id="plugin" />
           </div>
           <CreateEventBTN />
         </div>

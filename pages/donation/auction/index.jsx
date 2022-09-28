@@ -132,11 +132,13 @@ export default function AuctionNFT() {
       if (contract && id) {
         setAccountAddress(window.accountId);
         setEventId(id); //setting Event id
-        const valueAll = await contract.eventURI(id); //Getting event URI from smart contract
+        id = Number(id);
+        const valueAll = JSON.parse(await window.nearcontract.event_uri({event_id:id})) //Getting event URI from smart contract
+       
         const value = valueAll[1];
 
         const arr = [];
-        const totalTokens = await contract.gettokenSearchEventTotal(id); //Getting total NFTs of that event
+        const totalTokens =JSON.parse(await window.nearcontract.get_token_search_from_event({event_id:id})); //Getting total NFTs of that event
         let totalEarned = await contract.getEventRaised(Number(id));
         for (let i = 0; i < totalTokens.length; i++) {
           //Getting total 10 NFTs

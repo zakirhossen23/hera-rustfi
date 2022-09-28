@@ -135,7 +135,6 @@ export default function Login() {
   }
   async function onClickDisConnectNEAR() {
     await window.walletConnection.signOut();
-    window.location.href = window.location.href;
   }
 
   //Aurora

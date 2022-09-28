@@ -90,20 +90,9 @@ export default function DonateNFTModal({
       bids: [],
     };
 
-    const web3 = new Web3(window.ethereum);
-    const account = await web3.eth.getAccounts();
-    const PreviousTotalTokens = await contract.gettokenSearchEventTotal(EventID); //Getting total NFTs of that event
-    //Calling smart contract method(functon) to store in to EVM
-    await contract.claimToken(
-      account[0],
-      JSON.stringify(createdObject),
-      EventID
-    );
-      while (PreviousTotalTokens === await contract.gettokenSearchEventTotal(EventID)) {
-        await sleep(1000)
-      }
-
-    window.location.href = `/donation/auction?[${EventID}]`; //Going to that event auction page
+    //Calling smart contract method(functon) to store in to Smart Contract
+    await window.nearcontract.mint_nft({"nft_metadata":JSON.stringify(createdObject),"event_id":Number(EventID)}, "60000000000000")
+      
   }
 
   return (
