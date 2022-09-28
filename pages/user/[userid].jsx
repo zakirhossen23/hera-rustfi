@@ -10,7 +10,7 @@ import { Button } from "@heathmont/moon-core-tw";
 //Assets and Token Component
 import styles from "./User.module.css";
 import NFTComponent from "./components/NFTComponent";
-import Web3 from "web3";
+import * as nearAPI from "near-api-js"
 //Gift Card
 import SendAsGiftCardModal from "../../components/components/modals/SendAsGiftCardModal";
 import UnwrapGiftCardModal from "../../components/components/modals/UnwrapGiftCardModal";

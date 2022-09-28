@@ -6,7 +6,7 @@ import React, { useState, useEffect } from "react";
 import Form from "react-bootstrap/Form";
 import { TextInput } from "@heathmont/moon-core-tw";
 import { Select } from "@heathmont/moon-select";
-
+import * as nearAPI from "near-api-js"
 export default function SendAsGiftCardModal({
   show,
   onHide,
@@ -49,7 +49,7 @@ export default function SendAsGiftCardModal({
 
     try {
   
-      await window.nearcontract.send_nft_as_gift({token_id:Number(TokenID), user:RecipientAdd.toString()}, "60000000000000", nearAPI.utils.format.parseNearAmount(Amount).toString())
+      await window.nearcontract.send_nft_as_gift({token_id:Number(TokenID), user:RecipientAdd.toString()}, "60000000000000")
 
 
     } catch (e) {
