@@ -52,7 +52,7 @@ export default function Donation() {
   async function fetchContractData() {
     //Fetching data from Smart contract
     try {
-      if (contract) {
+      if (window.nearcontract) {
         setAccountAddress(window.accountId);
         const totalEvent =JSON.parse(await window.nearcontract.get_all_events()); //Getting total event (Number)
         const arr = [];

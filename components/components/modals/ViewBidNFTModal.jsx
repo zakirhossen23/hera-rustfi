@@ -25,7 +25,7 @@ export default function ViewmodalShow({ show, onHide, id, title }) {
   async function fetchContractData() {
     //Returning all the Informaiton after page load
     try {
-      if (contract && id ) {
+      if (window.nearcontract && id ) {
         setList([]);
         const arr = [];
         const totalBids = JSON.parse(await window.nearcontract.get_bid_info_from_nft({token_id: Number(id)})); //Getting total bids of this NFT id

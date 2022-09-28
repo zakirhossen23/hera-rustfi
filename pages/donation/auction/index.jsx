@@ -129,7 +129,7 @@ export default function AuctionNFT() {
 
   async function fetchContractData() {
     try {
-      if (contract && id) {
+      if (window.nearcontract && id) {
         setAccountAddress(window.accountId);
         setEventId(id); //setting Event id
         id = Number(id);

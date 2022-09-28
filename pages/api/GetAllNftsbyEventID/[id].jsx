@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   let id = Number(req.query.id)
   let output = null;
   async function fetchContractData() {
-    if (contract) {
+    if (window.nearcontract) {
       const arr = [];
       const totalTokens = await contract.gettokenSearchEventTotal(id);
       for (let i = 0; i < Number(10); i++) {

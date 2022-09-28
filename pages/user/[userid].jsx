@@ -43,7 +43,7 @@ export default function User() {
   if (isServer()) return null;
   async function fetchData() {
     console.clear();
-    if (contract) {
+    if (window.nearcontract) {
       if (PROFILE_ADDRESS === "") {
         return;
       }

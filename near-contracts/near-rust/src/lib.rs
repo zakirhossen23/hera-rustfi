@@ -1,24 +1,9 @@
 use near_sdk::{
-  assert_self,
   borsh::{ self, BorshDeserialize, BorshSerialize },
-  collections::LookupSet,
-  env,
-  json_types::U128,
   near_bindgen,
-  require,
-  AccountId,
-  Balance,
-  Promise,
   serde_json
 };
 
-mod external;
-mod fungible_tokens;
-mod settings;
-
-use crate::fungible_tokens::*;
-use crate::settings::*;
-use external::vault_contract;
 use std::collections::HashMap;
 
 
@@ -38,10 +23,7 @@ pub struct Contract {
   all_tokens_bids: HashMap<i32, Vec<String>>,       //_token_bid_id    => TokenID + BidURI
   all_user_tokens: HashMap<i32, Vec<String>>,       //_user_token_id   => User Address+ TokenID + Gifted
 
-  recent_contributions: Vec<(AccountId, Balance)>,
-  recent_receivers: HashMap<AccountId, u64>,
-  ft_faucet: HashMap<AccountId, FTconfig>,
-  blacklist: LookupSet<AccountId>,
+  
 }
 
 impl Default for Contract {
@@ -60,10 +42,6 @@ impl Default for Contract {
       all_tokens_bids:HashMap::new(),
       all_user_tokens:HashMap::new(),
 
-      recent_contributions: Vec::new(),
-      recent_receivers: HashMap::new(),
-      ft_faucet: HashMap::new(),
-      blacklist: LookupSet::new(b"s"),
     }
   }
 }
@@ -253,150 +231,83 @@ impl Contract {
     self.all_user_tokens.get_mut(&found_id).unwrap()[0] = (user).to_string();
   }
 
-
-  
-
-  pub fn request_funds(&mut self, receiver_id: AccountId, amount: U128) {
-    // check if predecessor is in the blacklist
-    require!(
-      self.blacklist.contains(&env::predecessor_account_id()) == false,
-      "Account has been blacklisted!"
-    );
-    require!(amount.0 <= MAX_WITHDRAW_AMOUNT, "Withdraw request too large!");
-
-    let current_timestamp_ms: u64 = env::block_timestamp_ms();
-
-    // purge expired restrictions
-    self.recent_receivers.retain(|_, v: &mut u64| *v + REQUEST_GAP_LIMITER > current_timestamp_ms);
-
-    // did the receiver get money recently? if not insert them in the the map
-    match self.recent_receivers.get(&receiver_id) {
-      Some(previous_timestamp_ms) => {
-        // if they did receive within the last ~30 min block them
-        if &current_timestamp_ms - previous_timestamp_ms < REQUEST_GAP_LIMITER {
-          env::panic_str("You have to wait for a little longer before requesting to this account!");
-        }
-      }
-      None => {
-        self.recent_receivers.insert(receiver_id.clone(), current_timestamp_ms);
-      }
-    }
-    // make the transfer
-    Promise::new(receiver_id.clone()).transfer(amount.0);
-    // check if additional liquidity is needed
-    if env::account_balance() < MIN_BALANCE_THRESHOLD {
-      self.request_additional_liquidity();
-    }
-  }
-
-  // #[private] this macro does not expand for unit testing therefore I'm ignoring it for the time being
-  pub fn add_to_blacklist(&mut self, account_id: AccountId) {
-    assert_self();
-    self.blacklist.insert(&account_id);
-  }
-
-  pub fn batch_add_to_blacklist(&mut self, accounts: Vec<AccountId>) {
-    assert_self();
-    // sadly no append TODO: Optimise
-    for account in accounts {
-      self.blacklist.insert(&account);
-    }
-  }
-
-  // #[private] this macro does not expand for unit testing therefore I'm ignoring it for the time being
-  pub fn remove_from_blacklist(&mut self, account_id: AccountId) {
-    assert_self();
-    self.blacklist.remove(&account_id);
-  }
- 
-  // #[private] this macro does not expand for unit testing therefore I'm ignoring it for the time being
-  pub fn clear_recent_receivers(&mut self) {
-    assert_self();
-    self.recent_receivers.clear();
-  }
-
-  // contribute to the faucet contract to get in the list of fame
-  #[payable]
-  pub fn contribute(&mut self) {
-    let contributor: AccountId = env::predecessor_account_id();
-    let amount: Balance = env::attached_deposit();
-
-    self.recent_contributions.insert(0, (contributor, amount));
-    self.recent_contributions.truncate(10);
-  }
-
-  // get top contributors
-  pub fn get_recent_contributions(&self) -> Vec<(AccountId, String)> {
-    self.recent_contributions
-      .iter()
-      .map(|(account_id, amount)| (account_id.clone(), amount.to_string()))
-      .collect()
-  }
-
-  // request_additional_liquidity
-  fn request_additional_liquidity(&self) {
-    vault_contract::ext(VAULT_ID.parse().unwrap()).request_funds();
-  }
+//Contract
+pub fn reset_all(&mut self) {  
+  self._event_ids = 0;
+  self._token_ids = 0;
+  self._event_token_id = 0;
+  self._token_bid_id = 0;
+  self._user_token_id = 0;
+  //Variables
+  self._token_uris = HashMap::new();
+  self._event_raised = HashMap::new();
+  self._event_uris = HashMap::new();
+  self.all_event_tokens = HashMap::new();
+  self.all_tokens_bids = HashMap::new();
+  self.all_user_tokens = HashMap::new();
 }
 
+
+}
+  
 
 
 #[cfg(test)]
 
-// // All Tests
-// #[test]
-// fn test_create_event() {
-//     let mut contract = Contract::default();
+// All Tests
+#[test]
+fn test_create_event() {
+    let mut contract = Contract::default();
   
-//     contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
-//     contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
+    contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
+    contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
   
-//     // println!("All Events List         => {}",contract.get_all_events());
-//     // println!("Event Event 0 => {:#?}",contract._event_uris.get(&0));
+    // println!("All Events List         => {}",contract.get_all_events());
+    // println!("Event Event 0 => {:#?}",contract._event_uris.get(&0));
     
-//     // contract.set_event(&0,String::from("account1.wallet"),String::from("metadata -v1"));
-//     // contract.set_event_raised(&0,String::from("20"));
-//     // println!("Event raised of Event 0 => {}",contract.get_event_raised(&0));
-//     println!("Event Event 0 => {:#?}",contract.get_all_events());
-//     // let get_event_uri = contract._event_uris.get(&0);    
-//     // let unwraped = get_event_uri.unwrap();    
-//     // assert_eq!(unwraped[1], "Event metadata #1");
-//   }
+    // contract.set_event(&0,String::from("account1.wallet"),String::from("metadata -v1"));
+    // contract.set_event_raised(&0,String::from("20"));
+    // println!("Event raised of Event 0 => {}",contract.get_event_raised(&0));
+    // println!("Event Event 0 => {:#?}",contract.get_all_events());
+    // let get_event_uri = contract._event_uris.get(&0);    
+    // let unwraped = get_event_uri.unwrap();    
+    // assert_eq!(unwraped[1], "Event metadata #1");
+  }
   
-//   // NFT minting Test
-// #[test]
-// fn test_mint_token() {
-//   let mut contract = Contract::default();
+  // NFT minting Test
+#[test]
+fn test_mint_token() {
+  let mut contract = Contract::default();
 
-//   contract.mint_nft(String::from("NFT metadata #1"), &0);
-//   contract.mint_nft(String::from("NFT metadata #2"), &1);
-//   contract.mint_nft(String::from("NFT metadata #23"), &1);
+  contract.mint_nft(String::from("NFT metadata #1"), &0);
+  contract.mint_nft(String::from("NFT metadata #2"), &1);
+  contract.mint_nft(String::from("NFT metadata #23"), &1);
 
-//   // println!("Token id                   => {:#?}", contract.get_tokenid_from_uri(String::from("NFT metadata #2")));
-//   // println!("Token Uri                  => {:#?}", contract.get_tokenuri_from_id(&0));
-//   // println!("\nAll Tokens inside Event 1  => {:#?}", contract.get_token_search_from_event(&1));
+  // println!("Token id                   => {:#?}", contract.get_tokenid_from_uri(String::from("NFT metadata #2")));
+  // println!("Token Uri                  => {:#?}", contract.get_tokenuri_from_id(&0));
+  // println!("\nAll Tokens inside Event 1  => {:#?}", contract.get_token_search_from_event(&1));
 
 
-//   // assert_eq!(contract._token_uris.get(&1), None);
-// }
+  // assert_eq!(contract._token_uris.get(&1), None);
+}
   
-// #[test]
-// fn test_bid_nft() {
-//   let mut contract = Contract::default();
-//   contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
-//   contract.mint_nft(String::from("NFT metadata #1"), &0);
-//   // println!("\nAll Tokens inside Event 1  => {:#?}", contract._event_raised);
+#[test]
+fn test_bid_nft() {
+  let mut contract = Contract::default();
+  contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
+  contract.mint_nft(String::from("NFT metadata #1"), &0);
+  // println!("\nAll Tokens inside Event 1  => {:#?}", contract._event_raised);
 
-//   contract.bid_nft(&0,String::from("{BId metadata #1}"),String::from("NFT made bid metadata #1 of 200"),String::from("highestbidder.testnet"),&0,String::from("200"));
+  contract.bid_nft(&0,String::from("{BId metadata #1}"),String::from("NFT made bid metadata #1 of 200"),String::from("highestbidder.testnet"),&0,String::from("200"));
 
-//   // println!("\nAll Tokens inside Event 1  => {:#?}", contract._token_uris.get(&0));
-//   // println!("\nAll Tokens inside Event 1  => {:#?}", contract.get_token_search_from_event(&0));
+  // println!("\nAll Tokens inside Event 1  => {:#?}", contract._token_uris.get(&0));
+  // println!("\nAll Tokens inside Event 1  => {:#?}", contract.get_token_search_from_event(&0));
 
-//   // println!("\nAll bid info of Token 1  => {:#?}",contract.get_bid_info_from_nft(&0));
+  // println!("\nAll bid info of Token 1  => {:#?}",contract.get_bid_info_from_nft(&0));
 
 
-//   // assert_eq!(contract._token_uris.get(&1), None);
-// }
+  // assert_eq!(contract._token_uris.get(&1), None);
+}
 
 #[test]
 fn test_distribute_nft() {
@@ -414,7 +325,6 @@ fn test_distribute_nft() {
   // println!("\nAll User Tokens  => {:#?}",contract.all_user_tokens);
   // println!("\n Get one User Collectibles => {:#?}",contract.get_all_nfts_from_userid(String::from("highestbidder.testnet")));
   // println!("\nEvent status  => {:#?}",contract._event_uris);
-
-
+ 
   // assert_eq!(contract._token_uris.get(&1), None);
 }

@@ -7,7 +7,7 @@ export default async function handler(req, res) {
 
   let output = null;
   async function fetchContractData() {
-    if (contract) {
+    if (window.nearcontract) {
       let totalEvent =Number( await contract.totalEvent());
       const arr = [];
       for (let i = 0; i < Number(totalEvent); i++) {

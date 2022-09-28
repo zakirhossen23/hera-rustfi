@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   const contract = usContract(privatekey);
   let output = null;
   async function fetchContractData() {
-    if (contract) {
+    if (window.nearcontract) {
       // try {
       const tokenURIJSON = await contract.tokenURI(id);
       let tokenURI = JSON.parse(tokenURIJSON);
