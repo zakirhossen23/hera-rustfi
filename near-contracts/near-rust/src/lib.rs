@@ -100,6 +100,7 @@ impl Contract {
     return (self._token_uris.get(token_id).unwrap()[0]).to_string();
   }
 
+  //NFTs => Bid
   #[payable]
   pub fn bid_nft(&mut self,_token_id:&i32 ,_bid_uri:String ,_updated_uri:String ,_highest_bidder:String , _eventid:&i32 , _raised:String ) {
 
@@ -119,6 +120,17 @@ impl Contract {
     self.all_tokens_bids.insert(_TOKEN_BID_ID,stuff);
     _TOKEN_BID_ID += 1;}
   }
+
+  pub fn get_bid_info_from_nft(&self,token_id:&i32)-> String{
+    //Filtering all bid info by token id
+    let new: HashMap<&i32, &Vec<String>> =  self.all_tokens_bids.iter()
+    .filter(|(_id, value)| value[0].to_string() == token_id.to_string()).collect();
+
+    //Getting only the bid URIs from the filtered
+    let bid_uris_list:Vec<&String> = new.iter().map(|(_id,value)| {return &value[1]} ).collect();
+
+    return serde_json::to_string(&bid_uris_list).unwrap();
+  } 
 
 
 
@@ -301,12 +313,14 @@ fn test_bid_nft() {
   let mut contract = Contract::default();
   contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
   contract.mint_nft(String::from("NFT metadata #1"), &0);
-  println!("\nAll Tokens inside Event 1  => {:#?}", contract.get_token_search_from_event(&0));
-
-  contract.bid_nft(&0,String::from("NFT metadata #1"),String::from("NFT made bid metadata #1"),String::from("highestbidder.testnet"),&0,String::from("200"));
-
-  // println!("\nAll Tokens inside Event 0  => {:#?}", contract._token_uris.get(&0));
   // println!("\nAll Tokens inside Event 1  => {:#?}", contract.get_token_search_from_event(&0));
+
+  contract.bid_nft(&0,String::from("{BId metadata #1}"),String::from("NFT made bid metadata #1 of 200"),String::from("highestbidder.testnet"),&0,String::from("200"));
+
+  // println!("\nAll Tokens inside Event 1  => {:#?}", contract._token_uris.get(&0));
+  // println!("\nAll Tokens inside Event 1  => {:#?}", contract.get_token_search_from_event(&0));
+
+  // println!("\nAll bid info of Token 1  => {:#?}",contract.get_bid_info_from_nft(&0));
 
 
   // assert_eq!(contract._token_uris.get(&1), None);

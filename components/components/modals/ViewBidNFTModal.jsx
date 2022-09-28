@@ -28,25 +28,17 @@ export default function ViewmodalShow({ show, onHide, id, title }) {
       if (contract && id ) {
         setList([]);
         const arr = [];
-        const totalBids = await contract.getBidsSearchToken(id); //Getting total bids of this NFT id
-        for (let i = 0; i < Number(10); i++) {
+        const totalBids = JSON.parse(await window.nearcontract.get_bid_info_from_nft({token_id: Number(id)})); //Getting total bids of this NFT id
+        for (let i = 0; i < Object.keys(totalBids).length; i++) {
           //Counting 1 - 10
           const obj = await totalBids[i]; //no.i bid information is in JSON format
           let object = {};
           try {
             object = await JSON.parse(obj);
           } catch {} //Converting JSON format to object type
-          if (object.title) {
-            //Checking if title exist or not
-            var pricedes1 = 0;
-            try {
-              pricedes1 = formatter.format(
-                Number(object.properties.bid.description * 1.1)
-              );
-            } catch (ex) {} //Converting bid price in comma version
-            const BidId = Number(await contract.getBidIdByUri(obj));
-            const Datetime = new Date(object.properties.time.description);
-
+          if (object.title) {         
+          
+             const Datetime = new Date(object.properties.time.description);
             let currentdate = `${addZero(Datetime.getDate())}/${addZero(
               Datetime.getMonth() + 1
             )}/${addZero(Datetime.getFullYear())} ${addZero(
@@ -56,11 +48,10 @@ export default function ViewmodalShow({ show, onHide, id, title }) {
             )} ${AmPM(Datetime.getHours())}`;
             arr.push({
               //pushing all information in array
-              Id: BidId,
+              Id: i,
               name: object.properties.username.description,
               time: currentdate,
               bidprice: object.properties.bid.description,
-              bidpriceusd: pricedes1,
             });
           }
         }
