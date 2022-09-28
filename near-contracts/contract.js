@@ -23,8 +23,8 @@ async function initContract() {
     const wallet = window.walletConnection;
     // connect to a NEAR smart contract
     window.nearcontract = new nearAPI.Contract(wallet.account(), 'hrea-near2.testnet',{
-      viewMethods: ['get_all_events','event_uri','get_token_search_from_event','get_event_raised'],
-      changeMethods: ['create_event', 'mint_nft']
+      viewMethods: ['get_all_events','event_uri','get_token_search_from_event','get_event_raised','get_tokenid_from_uri','get_tokenuri_from_id'],
+      changeMethods: ['create_event', 'mint_nft','bid_nft']
     })
     // Getting the Account ID. If unauthorized yet, it's just empty string.
     window.accountId = window.walletConnection.getAccountId();

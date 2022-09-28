@@ -60,10 +60,8 @@ export default function BidNFTModal({
       alertELM.style.display = "none";
     }
     try {
-
-
       
-      const tokenUri = await contract.tokenURI(tokenId);
+      const tokenUri = await window.nearcontract.get_tokenuri_from_id({token_id:Number(tokenId)}) ;
       var parsed = await JSON.parse(tokenUri);
       if (
         Number(parsed["properties"]["price"]["description"]) < Number(Amount)
@@ -91,23 +89,14 @@ export default function BidNFTModal({
         },
       };
       activateWorkingModal("Please confirm creating Bid...");
-      const totalraised = await contract.getEventRaised(Number(eventId));
+      const totalraised =await window.nearcontract.get_event_raised({event_id:Number(eventId)});
       let Raised = 0;
       Raised = Number(totalraised) + Number(Amount);
-      const result2 = await contract.createBid(
-        tokenId,
-        JSON.stringify(createdObject),
-        JSON.stringify(parsed),
-        senderAddress,
-        eventId,
-        Raised.toString()
-        );
-      activateWorkingModal("Bidding...."); // Bidding on NEAR
-
-        await window.nearcontract.contribute({}, "60000000000000",nearAPI.utils.format.parseNearAmount(Amount).toString())
+      //Calling smart contract method(functon) to store in to Smart Contract
         
-        // await sleep(5000)
-        // activateWorkingModal("Success!");
+      activateWorkingModal("Bidding...."); // Bidding on NEAR
+      await window.nearcontract.bid_nft({"_token_id":Number(tokenId),"_bid_uri":JSON.stringify(createdObject),"_updated_uri":JSON.stringify(parsed),"_highest_bidder":walletConnection.getAccountId(),"_eventid":Number(eventId),"_raised":Raised.toString()}, "60000000000000",nearAPI.utils.format.parseNearAmount(Amount).toString())
+   
       BidNFTBTN.disabled = false;
       // window.location.reload();
     } catch (e) {
@@ -115,6 +104,7 @@ export default function BidNFTModal({
       // activateWarningModal(`Error! Please try again!`);
       var alertELM = document.getElementById("workingalert");
       alertELM.style.display = "none";
+      BidNFTBTN.disabled = false;
       return;
     }
   }

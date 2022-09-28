@@ -155,7 +155,7 @@ export default function AuctionNFT() {
                 Number(object.properties.price.description * 5.51)
               ); //Bid price in comma version
             } catch (ex) {}
-            const TokenId = Number(await contract.gettokenIdByUri(obj)); //Getting NFT id from NFT URI
+            const TokenId = Number(await window.nearcontract.get_tokenid_from_uri({token_uri: obj})); //Getting NFT id from NFT URI
 
             arr.push({
               Id: TokenId,
