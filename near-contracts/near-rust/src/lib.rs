@@ -243,6 +243,17 @@ impl Contract {
     return json;
   }
 
+  pub fn send_nft_as_gift(&mut self, token_id:&i32,user:String) { //Send NFT as GIft
+    let mut found_id: i32 = -1;
+    for  (k, v) in self.all_user_tokens.iter() {
+      if  v[1].to_string() == token_id.to_string() {
+        found_id = *k;
+      }
+    }    
+    self.all_user_tokens.get_mut(&found_id).unwrap()[0] = (user).to_string();
+  }
+
+
   
 
   pub fn request_funds(&mut self, receiver_id: AccountId, amount: U128) {

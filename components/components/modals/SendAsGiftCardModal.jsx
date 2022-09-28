@@ -25,7 +25,6 @@ export default function SendAsGiftCardModal({
   const [NameUser, setNameUser] = useState("Write name");
   const [Message, setMessage] = useState("(Write your message)");
   const [FontType, setFontType] = useState("");
-  const Web3 = require("web3");
 
   const sleep = (milliseconds) => {
     //Custom Sleep function to wait
@@ -33,7 +32,7 @@ export default function SendAsGiftCardModal({
   };
 
   async function FecthNFTinfo() {
-    const tokeninfo = await contract.tokenURI(Number(TokenID));
+    const tokeninfo = await window.nearcontract.get_tokenuri_from_id({token_id:Number(TokenID)});
     var value = JSON.parse(tokeninfo);
     setTokenURI({
       name: value.properties.name.description,
@@ -49,29 +48,10 @@ export default function SendAsGiftCardModal({
     sendGiftBTN.disabled = true;
 
     try {
-      const web3 = new Web3(window.ethereum);
-      const account = await web3.eth.getAccounts();
+  
+      await window.nearcontract.send_nft_as_gift({token_id:Number(TokenID), user:RecipientAdd.toString()}, "60000000000000", nearAPI.utils.format.parseNearAmount(Amount).toString())
 
-      const createdObject = {
-        Message: Message,
-        FontType: FontType,
-        NameUser: NameUser,
-        Wallet: account[0],
-      };
 
-      await contract.createTokenGift(
-        TokenID.toString(),
-        RecipientAdd,
-        JSON.stringify(createdObject)
-      );
-
-      while (await contract.GetGiftedFromToken(TokenId.toString()) !== "True") {
-        await sleep(1000);
-      }
-
-      sendGiftBTN.disabled = false;
-     
-      window.location.reload();
     } catch (e) {
       console.error(e);
     }
@@ -104,7 +84,7 @@ export default function SendAsGiftCardModal({
       <div className="flex flex-col">
         <Form className="flex flex-col gap-6 p-6">
           <Form.Group>
-            <div className="mb-2">Wallet address</div>
+            <div className="mb-2">Recipient wallet address</div>
             <TextInput
               placeholder="Add address"
               type="text"
@@ -118,7 +98,7 @@ export default function SendAsGiftCardModal({
             <div className="mb-2">Username</div>
 
             <TextInput
-              placeholder="Tag a user name with @"
+              placeholder="Tag your user name with @"
               type="text"
               onChange={(e) => {
                 setNameUser(e.target.value);
