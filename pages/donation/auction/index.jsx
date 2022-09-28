@@ -139,9 +139,9 @@ export default function AuctionNFT() {
 
         const arr = [];
         const totalTokens =JSON.parse(await window.nearcontract.get_token_search_from_event({event_id:id})); //Getting total NFTs of that event
-        let totalEarned = await contract.getEventRaised(Number(id));
+        let totalEarned = await window.nearcontract.get_event_raised({event_id:id}) ;
         for (let i = 0; i < totalTokens.length; i++) {
-          //Getting total 10 NFTs
+          //Getting all NFTs
           const obj = await totalTokens[i];
 
           let object = {};

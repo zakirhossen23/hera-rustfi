@@ -27,6 +27,7 @@ use std::collections::HashMap;
 pub struct Contract {
   //Variables
   _token_uris: HashMap<i32, String>,
+  _event_raised: HashMap<i32, String>,              //_EVENT_IDS 	     => Raised
   _event_uris: HashMap<i32, Vec<String>>,           //_EVENT_IDS       => Event Wallet + Event URI + Finished
   all_event_tokens: HashMap<i32, Vec<String>>,      //_EVENT_TOKEN_ID  => Event ID + Token URI
 
@@ -42,6 +43,7 @@ impl Default for Contract {
     Self {
       //Variables
       _token_uris: HashMap::new(),
+      _event_raised: HashMap::new(),
       _event_uris: HashMap::new(), 
       all_event_tokens:HashMap::new(), 
 
@@ -85,6 +87,7 @@ impl Contract {
     stuff.push("False".to_string());
 
     self._event_uris.insert(unsafe { _EVENT_IDS },stuff);
+    self._event_raised.insert(unsafe { _EVENT_IDS },String::from("0"));
     unsafe {_EVENT_IDS += 1;}
     return unsafe { _EVENT_IDS };
   }
@@ -99,6 +102,10 @@ impl Contract {
     return json;
   }
 
+  pub fn get_event_raised(&self,event_id:&i32)-> String{
+    return self._event_raised.get(event_id).unwrap().to_string();
+  }
+
   pub fn get_token_search_from_event(&self,event_id:&i32)-> String{
     //Filtering all the event id contains Tokens
     let new: HashMap<&i32, &Vec<String>> =  self.all_event_tokens.iter()
@@ -109,6 +116,9 @@ impl Contract {
 
     return serde_json::to_string(&token_uris_list).unwrap();
   }
+
+
+  
 
   pub fn request_funds(&mut self, receiver_id: AccountId, amount: U128) {
     // check if predecessor is in the blacklist
@@ -207,12 +217,9 @@ fn test_create_event() {
     contract.create_event(String::from("account1.wallet"),String::from("Event metadata #1"));
   
     // println!("{}",contract.get_all_events());
-
-
-    // let get_event_uri = contract._event_uris.get(&0);
-    
-    // let unwraped = get_event_uri.unwrap();
-    
+    // println!("{}",contract.get_event_raised(&0));
+    // let get_event_uri = contract._event_uris.get(&0);    
+    // let unwraped = get_event_uri.unwrap();    
     // assert_eq!(unwraped[1], "Event metadata #1");
   }
   
@@ -225,7 +232,7 @@ fn test_mint_token() {
   contract.mint_nft(String::from("NFT metadata #2"), &1);
   contract.mint_nft(String::from("NFT metadata #23"), &1);
   // println!("{:#?}", contract.all_event_tokens.get(&0));
-  println!("{:#?}", contract.get_token_search_from_event(&1));
+  // println!("{:#?}", contract.get_token_search_from_event(&1));
 
 
   // assert_eq!(contract._token_uris.get(&1), None);
