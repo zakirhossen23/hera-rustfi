@@ -176,6 +176,16 @@ impl Contract {
   pub fn get_event_raised(&self,event_id:&i32)-> String{
     return self._event_raised.get(event_id).unwrap().to_string();
   }
+  
+  pub fn get_eventid_from_tokenuri(&self,token_uri:String)-> i32{
+    let mut found_id: i32 = -1;
+    for  (k, v) in self._event_uris.iter() {
+      if  v[1].to_string() == token_uri.to_string() {
+        found_id = *k;
+      }
+    }    
+    return found_id;
+  }
 
 
   //Events and Tokens
@@ -219,6 +229,18 @@ impl Contract {
 
       self._event_uris.get_mut(event_id).unwrap()[2] = String::from("Finished");
    
+  }
+
+  
+  pub fn get_all_nfts_from_userid(&self,user:String)-> String{
+    let mut stuff : Vec<String> = Vec::new(); 
+    for  (_k, v) in self.all_user_tokens.iter() {
+      if  v[0].to_string() == user.to_string() {
+        stuff.push(v[1].to_string());
+      }
+    }    
+    let json = serde_json::to_string(&stuff).unwrap();
+    return json;
   }
 
   
@@ -374,11 +396,12 @@ fn test_distribute_nft() {
   contract.mint_nft(String::from("NFT metadata #2"), &0);
   contract.mint_nft(String::from("NFT metadata #23"), &1);
   contract.bid_nft(&0,String::from("{BId metadata #1}"),String::from("NFT made bid metadata #1 of 200"),String::from("highestbidder.testnet"),&0,String::from("200"));
-  contract.bid_nft(&1,String::from("{BId metadata #2}"),String::from("NFT made bid metadata #2 of 200"),String::from("highestbidder2.testnet"),&0,String::from("300"));
+  contract.bid_nft(&1,String::from("{BId metadata #2}"),String::from("NFT made bid metadata #2 of 200"),String::from("highestbidder1.testnet"),&0,String::from("300"));
 
 
   contract.distribute_nft(&0);
   // println!("\nAll User Tokens  => {:#?}",contract.all_user_tokens);
+  // println!("\n Get one User Collectibles => {:#?}",contract.get_all_nfts_from_userid(String::from("highestbidder.testnet")));
   // println!("\nEvent status  => {:#?}",contract._event_uris);
 
 

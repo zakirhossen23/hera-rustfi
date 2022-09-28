@@ -49,14 +49,13 @@ export default function User() {
       }
 
       let arr = [];
-      let allWonNFTs = await contract.GetNFTsByUserAddrs(PROFILE_ADDRESS);
-      for (let index = 0; index < allWonNFTs.length; index++) {
-        const object = JSON.parse(allWonNFTs[index]);
-        const TokenId = Number(
-          await contract.gettokenIdByUri(allWonNFTs[index])
-        ); //Getting NFT id from NFT URI
-        const EventID = Number(await contract.geteventIdFromTokenURI(TokenId));
-        const isGifted = await contract.GetGiftedFromToken(TokenId.toString());
+      const allWonNFTs = JSON.parse(await window.nearcontract.get_all_nfts_from_userid({user:PROFILE_ADDRESS.toString()})) //Getting event URI from smart contract       
+    
+      for (let index = 0; index < Object.keys(allWonNFTs).length; index++) {
+        const TokenId = Number(allWonNFTs[index]); 
+        const object = JSON.parse(await window.nearcontract.get_tokenuri_from_id({token_id:TokenId})) 
+       
+        const EventID = await window.nearcontract.get_eventid_from_tokenuri({token_uri:JSON.stringify(object)});
         arr.push({
           Id: TokenId,
           name: object.properties.name.description,
@@ -64,7 +63,7 @@ export default function User() {
           price: Number(object.properties.price.description),
           image: object.properties.image.description,
           EventID: EventID,
-          isGift: isGifted,
+          isGift: false,
         });
       }
       setNFTs(arr);
