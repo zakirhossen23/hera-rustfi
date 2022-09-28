@@ -38,8 +38,7 @@ export default function Login() {
 
   const fetchDataStatus = async () => {
     if (
-      window.walletConnection?.isSignedIn() == true &&
-      window.ethereum.selectedAddress != null
+      window.walletConnection?.isSignedIn() == true
     ) {
       setConnectStatus(true);
     } else {
