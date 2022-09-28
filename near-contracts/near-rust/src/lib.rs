@@ -216,6 +216,9 @@ impl Contract {
        self.all_user_tokens.insert(self._user_token_id ,stuff);
        self._user_token_id += 1; 
       }
+
+      self._event_uris.get_mut(event_id).unwrap()[2] = String::from("Finished");
+   
   }
 
   
@@ -376,6 +379,7 @@ fn test_distribute_nft() {
 
   contract.distribute_nft(&0);
   // println!("\nAll User Tokens  => {:#?}",contract.all_user_tokens);
+  // println!("\nEvent status  => {:#?}",contract._event_uris);
 
 
   // assert_eq!(contract._token_uris.get(&1), None);
