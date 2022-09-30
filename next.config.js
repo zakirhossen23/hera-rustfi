@@ -21,10 +21,5 @@ module.exports = {
     };
 
     return config;
-  },
-  sassOptions: {
-    includePaths: [path.join(__dirname, 'styles')],
-    includePaths: [path.join(__dirname, 'pages')],
-    includePaths: [path.join(__dirname, 'components')],
-  },
+  }
 }

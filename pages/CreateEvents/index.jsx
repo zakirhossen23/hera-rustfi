@@ -151,7 +151,7 @@ export default function CreateEvents() {
      
     } catch (error) {
       console.error(error);
-      window.location.href = "/login?[/]"; //If found any error then it will let the user to login page
+      // window.location.href = "/login?[/]"; //If found any error then it will let the user to login page
     }
   }
 

@@ -17,13 +17,15 @@ pub struct Contract {
   _event_token_id: i32,
   _token_bid_id: i32,
   _user_token_id:i32,
-  _token_uris: HashMap<i32, Vec<String>>,           //_token_ids 	     => Token URI 	 + Highest Bidder
-  _event_raised: HashMap<i32, String>,              //_event_ids 	     => Raised
-  _event_uris: HashMap<i32, Vec<String>>,           //_event_ids       => Event Wallet + Event URI + Finished
-  _event_grant_uris: HashMap<i32, String>,          //_event_grant_ids => Grant Pool Event URI
-  all_event_tokens: HashMap<i32, Vec<String>>,      //_event_token_id  => Event ID + Token URI
-  all_tokens_bids: HashMap<i32, Vec<String>>,       //_token_bid_id    => TokenID + BidURI
-  all_user_tokens: HashMap<i32, Vec<String>>,       //_user_token_id   => User Address+ TokenID + Gifted
+  _grant_project_id:i32,
+  _token_uris: HashMap<i32, Vec<String>>,           //_token_ids 	        => (NFT)        Token URI 	 + Highest Bidder
+  _event_raised: HashMap<i32, String>,              //_event_ids 	        => (Auction)    Raised
+  _event_uris: HashMap<i32, Vec<String>>,           //_event_ids          => (Auction)    Event Wallet + Event URI         + Finished
+  _event_grant_uris: HashMap<i32, String>,          //_event_grant_ids    => (Grant Pool) Event URI
+  all_event_tokens: HashMap<i32, Vec<String>>,      //_event_token_id     => (Auction)    Event ID     + Token URI
+  all_tokens_bids: HashMap<i32, Vec<String>>,       //_token_bid_id       => (NFT)        TokenID      + BidURI
+  all_user_tokens: HashMap<i32, Vec<String>>,       //_user_token_id      => (User)       User Address + TokenID           + Gifted
+  all_grant_project: HashMap<i32, Vec<String>>,     //_grant_project_id   => (Grant Pool) Grant Id     + Project(Auction) Id
 
   
 }
@@ -37,6 +39,7 @@ impl Default for Contract {
       _event_token_id: 0,
       _token_bid_id:0,
       _user_token_id:0,
+      _grant_project_id:0,
       //Variables
       _token_uris: HashMap::new(),
       _event_raised: HashMap::new(),
@@ -45,6 +48,7 @@ impl Default for Contract {
       all_event_tokens:HashMap::new(), 
       all_tokens_bids:HashMap::new(),
       all_user_tokens:HashMap::new(),
+      all_grant_project:HashMap::new(),
 
     }
   }
@@ -149,6 +153,17 @@ impl Contract {
     let json = serde_json::to_string(&self._event_uris).unwrap();
     return json;
   }
+  pub fn get_all_events_from_wallet(&self,wallet:String)-> String{
+    let mut stuff : Vec<String> = Vec::new(); 
+    for  (_k, v) in self._event_uris.iter() {
+      if  v[0].to_string() == wallet.to_string() {
+        stuff.push(v[1].to_string());
+      }
+    }    
+    let json = serde_json::to_string(&stuff).unwrap();
+    return json;
+  }
+
 
   pub fn event_uri(&self,event_id:&i32)-> String{
     let json = serde_json::to_string(&self._event_uris.get(event_id)).unwrap();
@@ -161,14 +176,22 @@ impl Contract {
   
   pub fn get_eventid_from_tokenuri(&self,token_uri:String)-> i32{
     let mut found_id: i32 = -1;
-    for  (k, v) in self._event_uris.iter() {
+    for  (k, v) in self.all_event_tokens.iter() {
       if  v[1].to_string() == token_uri.to_string() {
         found_id = *k;
       }
     }    
     return found_id;
   }
-
+  pub fn get_eventid_from_eventuri(&self,event_uri:String)-> i32{
+    let mut found_id: i32 = -1;
+    for  (k, v) in self._event_uris.iter() {
+      if  v[1].to_string() == event_uri.to_string() {
+        found_id = *k;
+      }
+    }    
+    return found_id;
+  }
 
   //Events and Tokens
   pub fn get_token_search_from_event(&self,event_id:&i32)-> String{
@@ -242,10 +265,22 @@ impl Contract {
     self._event_grant_ids += 1;
     return self._event_grant_ids ;
   }
+  pub fn event_grant_uri(&self,event_id:&i32)-> String{
+    let json = serde_json::to_string(&self._event_grant_uris.get(event_id)).unwrap();
+    return json;
+  }
 
   pub fn get_all_grant_events(&self)-> String{
     let json = serde_json::to_string(&self._event_grant_uris).unwrap();
     return json;
+  }
+  pub fn check_submitted_project_grant(&self,grant_id:&i32, project_id:&i32)-> bool{
+    for  (_k, v) in self.all_grant_project.iter() {
+      if  v[0].to_string() == grant_id.to_string() &&  v[1].to_string() == project_id.to_string(){
+        return true;
+      }
+    }    
+    return false;
   }
 
 //Contract
@@ -256,6 +291,8 @@ pub fn reset_all(&mut self) {
   self._event_token_id = 0;
   self._token_bid_id = 0;
   self._user_token_id = 0;
+  self._grant_project_id=0;
+
   //Variables
   self._token_uris = HashMap::new();
   self._event_raised = HashMap::new();
@@ -264,6 +301,7 @@ pub fn reset_all(&mut self) {
   self.all_event_tokens = HashMap::new();
   self.all_tokens_bids = HashMap::new();
   self.all_user_tokens = HashMap::new();
+  self.all_grant_project = HashMap::new();
 }
 
 
