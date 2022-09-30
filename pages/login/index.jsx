@@ -48,7 +48,7 @@ export default function Login() {
   useEffect(() => {
     if (!isServer()) {
       setInterval(() => {
-        if (window.ethereum._state.accounts.length ==0){
+        if (window.walletConnection?.isSignedIn() == false) {
           setAuroraConnected(false);
         }else{
           setAuroraConnected(true);
