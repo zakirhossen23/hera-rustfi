@@ -38,7 +38,7 @@ export default function User() {
   useEffect(() => {
     PROFILE_ADDRESS = window.location.pathname.replace("/user/", "");
     fetchData();
-  }, [contract]);
+  });
 
   if (isServer()) return null;
   async function fetchData() {

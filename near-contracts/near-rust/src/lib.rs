@@ -12,6 +12,7 @@ use std::collections::HashMap;
 pub struct Contract {
   //Variables
   _event_ids: i32,
+  _event_grant_ids: i32,
   _token_ids: i32,
   _event_token_id: i32,
   _token_bid_id: i32,
@@ -19,6 +20,7 @@ pub struct Contract {
   _token_uris: HashMap<i32, Vec<String>>,           //_token_ids 	     => Token URI 	 + Highest Bidder
   _event_raised: HashMap<i32, String>,              //_event_ids 	     => Raised
   _event_uris: HashMap<i32, Vec<String>>,           //_event_ids       => Event Wallet + Event URI + Finished
+  _event_grant_uris: HashMap<i32, String>,          //_event_grant_ids => Grant Pool Event URI
   all_event_tokens: HashMap<i32, Vec<String>>,      //_event_token_id  => Event ID + Token URI
   all_tokens_bids: HashMap<i32, Vec<String>>,       //_token_bid_id    => TokenID + BidURI
   all_user_tokens: HashMap<i32, Vec<String>>,       //_user_token_id   => User Address+ TokenID + Gifted
@@ -30,6 +32,7 @@ impl Default for Contract {
   fn default() -> Self {
     Self {
       _event_ids : 0,
+      _event_grant_ids: 0,
       _token_ids: 0,
       _event_token_id: 0,
       _token_bid_id:0,
@@ -38,6 +41,7 @@ impl Default for Contract {
       _token_uris: HashMap::new(),
       _event_raised: HashMap::new(),
       _event_uris: HashMap::new(), 
+      _event_grant_uris: HashMap::new(), 
       all_event_tokens:HashMap::new(), 
       all_tokens_bids:HashMap::new(),
       all_user_tokens:HashMap::new(),
@@ -231,9 +235,23 @@ impl Contract {
     self.all_user_tokens.get_mut(&found_id).unwrap()[0] = (user).to_string();
   }
 
+  //Grant Pool Events
+  pub fn create_grant_event(&mut self, _event_uri: String) -> i32 {
+ 
+    self._event_grant_uris.insert(self._event_grant_uris.len() as i32,_event_uri.to_string());
+    self._event_grant_ids += 1;
+    return self._event_grant_ids ;
+  }
+
+  pub fn get_all_grant_events(&self)-> String{
+    let json = serde_json::to_string(&self._event_grant_uris).unwrap();
+    return json;
+  }
+
 //Contract
 pub fn reset_all(&mut self) {  
   self._event_ids = 0;
+  self._event_grant_ids = 0;
   self._token_ids = 0;
   self._event_token_id = 0;
   self._token_bid_id = 0;
@@ -242,6 +260,7 @@ pub fn reset_all(&mut self) {
   self._token_uris = HashMap::new();
   self._event_raised = HashMap::new();
   self._event_uris = HashMap::new();
+  self._event_grant_uris = HashMap::new();
   self.all_event_tokens = HashMap::new();
   self.all_tokens_bids = HashMap::new();
   self.all_user_tokens = HashMap::new();

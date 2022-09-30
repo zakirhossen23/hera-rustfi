@@ -4,25 +4,17 @@ import Image from "next/image";
 import NavLink from "next/link";
 
 import useContract from "../../services/useContract";
-import DonateNFTModal from "../../components/components/modals/DonateNFTModal";
 import { Header } from "../../components/layout/Header";
 import isServer from "../..//components/isServer";
-import styles from "./Auctions.module.css";
+import styles from "./grantspool.module.css";
 import Card from "../../components/components/Card/Card";
 import { ControlsChevronRight } from "@heathmont/moon-icons-tw";
 import { Button } from "@heathmont/moon-core-tw";
 
 export default function Donation() {
   //Variables
-  const [CreatemodalShow, setModalShow] = useState(false);
-  const { contract, signerAddress } = useContract("ERC721");
   const [list, setList] = useState([]);
-  const [selectid, setselectid] = useState("");
-  const [selectedtype, setselectedtype] = useState("");
-  const [SelectedTitle, setSelectedTitle] = useState("");
-  const [SelectedendDate, setSelectedendDate] = useState("");
-  const [SelectedWallet, setSelectedWallet] = useState("");
-  const [AccountAddress, setAccountAddress] = useState("");
+
   useEffect(() => {
     fetchContractData();
   });
@@ -53,15 +45,13 @@ export default function Donation() {
     //Fetching data from Smart contract
     try {
       if (window.nearcontract) {
-        setAccountAddress(window.accountId);
-        const totalEvent =JSON.parse(await window.nearcontract.get_all_events()); //Getting total event (Number)
+        const totalEvent =JSON.parse(await window.nearcontract.get_all_grant_events()); //Getting total event (Number)
         const arr = [];
 
         for (let i = 0; i < Object.keys(totalEvent).length; i++) {
           //total event number Iteration
-          const object = JSON.parse(totalEvent[i][1]);
-          const statusvalue = object[2]; //Get Event Status if it is finished or waiting for NFT release
-
+          const object = JSON.parse(totalEvent[i]);
+     
           if (object) {
             //Checking if the event date is expired or not
             var c = new Date(object.properties.Date.description).getTime();
@@ -78,14 +68,12 @@ export default function Donation() {
 
             arr.push({
               //Pushing all data into array
-
               eventId: i,
               Title: object.properties.Title.description,
               Date: object.properties.Date.description,
-              Goal: object.properties.Goal.description,
+              Goal: object.properties.Price.description,
               logo: object.properties.logo.description.url,
               wallet: object.properties.wallet.description,
-              status: statusvalue,
             });
           }
         }
@@ -109,7 +97,7 @@ export default function Donation() {
     var m = Math.floor((d % (1000 * 60 * 60)) / (1000 * 60));
     var s = Math.floor((d % (1000 * 60)) / 1000);
     if (s.toString().includes("-") && status === "Finished") {
-      return "Auction Ended";
+      return "Event Ended";
     } else if (s.toString().includes("-") && status !== "Finished") {
       return "Waiting for NFTs release";
     }
@@ -129,13 +117,13 @@ export default function Donation() {
     <>
       <Header></Header>
       <Head>
-        <title>Auctions</title>
-        <meta name="description" content="Auctions" />
+        <title>Grants Pools</title>
+        <meta name="description" content="Grants Pools" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div className={`${styles.container} flex items-center flex-col gap-8`}>
         <div className={`${styles.title} gap-8 flex flex-col`}>
-          <h1 className="text-moon-32 font-bold">All auctions</h1>
+          <h1 className="text-moon-32 font-bold">All Grants Pools</h1>
 
           <div className={`${styles.tabs} flex gap-4`}>
             <NavLink href="?q=All">
@@ -166,7 +154,7 @@ export default function Donation() {
                   </span>
                   <div className="flex flex-col gap-2 overflow-hidden text-left">
                     <div className="font-bold">{listItem.Title}</div>
-                    <div>Raised out of {listItem.Goal} NEAR</div>
+                    <div>Prize: {listItem.Goal} NEAR</div>
                     <div className="whitespace-nowrap truncate">
                       Organised by&nbsp;
                       {listItem.wallet !=
@@ -182,10 +170,10 @@ export default function Donation() {
                   <div className="flex items-center font-bold">
                     {LeftDate(listItem.Date, listItem.status)} left
                   </div>
-                  <NavLink href={`/donation/auction?[${listItem.eventId}]`}>
+                  <NavLink href={`/grantspoolevents/event?[${listItem.eventId}]`}>
                     <Button iconleft>
                       <ControlsChevronRight />
-                      Go to auction
+                      Go to Event
                     </Button>
                   </NavLink>
                 </div>
@@ -194,20 +182,6 @@ export default function Donation() {
           ))}
         </div>
       </div>
-
-      <DonateNFTModal //Donate NFT Modal code
-        show={CreatemodalShow}
-        onHide={() => {
-          setModalShow(false);
-        }}
-        contract={contract}
-        senderAddress={AccountAddress}
-        EventID={selectid}
-        type={selectedtype}
-        SelectedTitle={SelectedTitle}
-        enddate={SelectedendDate}
-        EventWallet={SelectedWallet}
-      />
     </>
   );
 }

@@ -52,11 +52,24 @@ export function Nav(): JSX.Element {
               </a>
             </NavLink>
           </li>
-
+          <li>
+            <NavLink href="/grantspoolevents" id="gransbtnNav">
+              <a>
+                <Button style={{ background: "none" }}> Grants Pool Events</Button>
+              </a>
+            </NavLink>
+          </li>
           <li>
             <NavLink href="/CreateEvents" id="donationbtnNav">
               <a>
                 <Button style={{ background: "none" }}>Create Auctions</Button>
+              </a>
+            </NavLink>
+          </li>
+          <li>
+            <NavLink href="/CreateGrantEvents">
+              <a>
+                <Button style={{ background: "none" }}>Create Grants Pool Events</Button>
               </a>
             </NavLink>
           </li>
