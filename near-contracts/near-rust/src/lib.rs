@@ -283,6 +283,17 @@ impl Contract {
     return false;
   }
 
+//Grant Pool Event + Project(Auction)
+pub fn create_grant_project(&mut self, grant_id: &i32,project_id: &i32 ) -> i32 {
+  let mut stuff : Vec<String> = Vec::new();
+  stuff.push(grant_id.to_string());
+  stuff.push(project_id.to_string());
+
+  self.all_grant_project.insert(self.all_grant_project.len() as i32,stuff);
+  self._grant_project_id += 1;
+  return self._grant_project_id ;
+}
+
 //Contract
 pub fn reset_all(&mut self) {  
   self._event_ids = 0;

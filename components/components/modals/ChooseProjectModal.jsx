@@ -58,18 +58,7 @@ export default function ChooseProjectModal({
     useEffect(()=>{fetchContractData();},[show]);
 
 	async function choosenProject(id) {
-		
-        try {
-            await window.nearcontract.CreateGrantProject(
-				id,
-				grantId
-            );
-
-        } catch {
-            window.location.href = ('/login');
-        }
-
-		window.location.reload();
+		await window.nearcontract.create_grant_project({"grant_id":Number(grantId), "project_id":Number(id)}, "60000000000000");
 	}
 
 

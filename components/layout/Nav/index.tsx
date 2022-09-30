@@ -27,6 +27,7 @@ export function Nav(): JSX.Element {
       let price = await Number(Balance.total / 1000000000000000000000000);
 
       setBalance(price.toString() + " NEAR");
+      if (!isSigned)
       setSigned(true);
       window.document.getElementById("withoutSign").style.display = "none";
       window.document.getElementById("withSign").style.display = "";
@@ -37,14 +38,20 @@ export function Nav(): JSX.Element {
     }
   }
   useEffect(() => {
-    setInterval(async () => {
-      await fetchInfo();
-    }, 1000);
-  }, []);
-  function NavButtons(): JSX.Element {
-    if (isSigned) {
-      return (
-        <>
+     fetchInfo();
+  }, [isSigned]);
+ 
+
+  async function onClickDisConnect() {
+    await window.walletConnection.signOut();
+    window.localStorage.setItem("Type", "");
+    window.location.href = "/";
+  }
+
+  return (
+    <nav className="main-nav w-full flex justify-between items-center">
+      <ul className="flex justify-between items-center w-full">
+        {isSigned?(   <>
           <li>
             <NavLink href="/donation" id="donationbtnNav">
               <a>
@@ -73,23 +80,7 @@ export function Nav(): JSX.Element {
               </a>
             </NavLink>
           </li>
-        </>
-      );
-    } else {
-      return <></>;
-    }
-  }
-
-  async function onClickDisConnect() {
-    await window.walletConnection.signOut();
-    window.localStorage.setItem("Type", "");
-    window.location.href = "/";
-  }
-
-  return (
-    <nav className="main-nav w-full flex justify-between items-center">
-      <ul className="flex justify-between items-center w-full">
-        <NavButtons />
+        </>):(<></>)}
 
         <li className="Nav walletstatus flex flex-1 justify-end">
           <div className="py-2 px-4 flex row items-center" id="withoutSign">
