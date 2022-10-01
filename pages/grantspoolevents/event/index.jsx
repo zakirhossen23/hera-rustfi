@@ -2,9 +2,7 @@ import { Button } from "@heathmont/moon-core-tw";
 import { ControlsPlus, TimeClock } from "@heathmont/moon-icons-tw";
 import Head from "next/head";
 import { useEffect, useState } from "react";
-import BidNFTModal from "../../../components/components/modals/BidNFTModal";
-import ViewBidNFTModal from "../../../components/components/modals/ViewBidNFTModal";
-import DonateNFTModal from "../../../components/components/modals/DonateNFTModal";
+import NavLink from "next/link";
 import ChooseProjectModal from '../../../components/components/modals/ChooseProjectModal';
 import { GenericLoyalty } from "@heathmont/moon-icons-tw";
 
@@ -24,7 +22,8 @@ export default function GrantEvent() {
   const [imageList, setimageList] = useState([]);
   const [title, setTitle] = useState("");
   const [goal, setgoal] = useState("");
-  const [EventEarned, setEventEarned] = useState("");
+  const [isJudger, setisJudger] = useState(false);
+  
   const [EventDescription, setEventDescription] = useState("");
   const [EventWallet, setEventWallet] = useState("");
   const [AccountAddress, setAccountAddress] = useState("");
@@ -135,45 +134,53 @@ export default function GrantEvent() {
 
         const value = valueAll;
 
-        // const arr = [];
-        // const totalTokens = JSON.parse(await window.nearcontract.get_token_search_from_event({ event_id: id })); //Getting total NFTs of that event
-        // let totalEarned = await window.nearcontract.get_event_raised({ event_id: id });
-        // for (let i = 0; i < totalTokens.length; i++) {
-        //   //Getting all NFTs
-        //   const obj = await totalTokens[i];
+        const arr = [];
+        const totalProjects = JSON.parse(await window.nearcontract.get_project_search_from_grant_event({ grant_id: id })); //Getting total Projects of that event
+        
+        for (let i = 0; i < Object.keys(totalProjects).length; i++) {
+          //Getting all Projects
+          const obj =  await JSON.parse(await totalProjects[i])[1];
+          
+          let object = {};
+          try {
+            object = await JSON.parse(obj);
+          } catch { }
+          if (object.title) {  
+            const ProjectId = Number(await window.nearcontract.get_eventid_from_eventuri({ event_uri: obj })); //Getting Project id from Project URI
+            const votes = JSON.parse(await window.nearcontract.get_grant_votes_from_grant({ grant_id: id, project_id: ProjectId})); 
+            let isvoted  = false;
+            for (let index = 0; index < votes.length; index++) {
+              const element = votes[index];
+              if (element === window.accountId){
+                isvoted = true;
+              }              
+            }
 
-        //   let object = {};
-        //   try {
-        //     object = await JSON.parse(obj);
-        //   } catch { }
-        //   if (object.title) {
-        //     var pricedes1 = 0;
-        //     try {
-        //       pricedes1 = formatter.format(
-        //         Number(object.properties.price.description * 5.51)
-        //       ); //Bid price in comma version
-        //     } catch (ex) { }
-        //     const TokenId = Number(await window.nearcontract.get_tokenid_from_uri({ token_uri: obj })); //Getting NFT id from NFT URI
-
-        //     arr.push({
-        //       Id: TokenId,
-        //       name: object.properties.name.description,
-        //       description: object.properties.description.description,
-        //       Bidprice: pricedes1,
-        //       highestbidder: object.properties.higherbidadd.description,
-        //       price: Number(object.properties.price.description),
-        //       type: object.properties.typeimg.description,
-        //       image: object.properties.image.description,
-        //     });
-        //   }
-        // }
-        // // console.log(valueAll);
-        // //Setting these data into variables
-        // setList(arr);
+            arr.push({
+              Id: ProjectId,
+              name: object.properties.Title.description,
+              description: object.properties.Description.description,            
+              goal: Number(object.properties.Goal.description),
+              image: object.properties.logo.description.url,
+              votecount: votes.length,
+              isVoted: isvoted,
+            });
+          }
+        }
+        // console.log(valueAll);
+        //Setting these data into variables
+        setList(arr);
         if (document.getElementById("Loading"))
           document.getElementById("Loading").style = "display:none";
 
         const object = JSON.parse(value);
+        for (let index = 0; index < object.properties.Judgersdata.length; index++) {
+          const element = object.properties.Judgersdata[index];
+          if (element.wallet.toLowerCase() == window.accountId.toLowerCase()) {
+              setisJudger(true);
+          }
+      }
+
         setimageList(object.properties.allFiles);
         setTitle(object.properties.Title.description);
         setselectedAddress(object.properties.wallet.description);
@@ -222,21 +229,15 @@ export default function GrantEvent() {
     setViewModalShow(true);
   }
 
-  function activateBidNFTModal(e) {
-    //Activating Bid NFT Modal
-    setselectid(e.target.getAttribute("tokenid"));
-    setselectbid(e.target.getAttribute("highestbid"));
-    console.log(selectbid);
-    setselecttype("NFT");
-    setModalShow(true);
-  }
 
 
   function submitProject() {
     setShowChooseProjectModal(true);
-    console.log(ShowChooseProjectModal);
   }
+  async function VoteProject(projectid) {
+    await window.nearcontract.create_grant_vote({"grant_id":Number(eventId), "project_id":Number(projectid), "wallet":window.accountId}, "60000000000000");
 
+  }
 
 
   return (
@@ -326,83 +327,41 @@ export default function GrantEvent() {
               {list.map((listItem, index) => (
                 <Card key={index} width={460}>
                   <div className="flex flex-col gap-5 justify-center items-center flex-1">
-                    <div className={styles["nft-image"]}>
+                    <div className={styles["event-image"]}>
                       <img src={listItem.image} />
                     </div>
                     <div className={`gap-4 flex flex-col flex-1`}>
                       <h6 className="text-moon-20">
-                        <span className="font-bold">Token name </span>
+                        <span className="font-bold">Project Name </span>
                         {listItem.name}
                       </h6>
                       <p className="text-trunks flex-1">
-                        {listItem.description}
+                        {listItem.description.substring(0, 80)}...
                       </p>
                       <p>
-                        Highest bid is{" "}
-                        <span className="font-bold">{listItem.price} NEAR</span>
-                        <br />
-                        <span
-                          className="whitespace-nowrap truncate"
-                          style={{ maxWidth: 412 }}
-                        >
-                          by{" "}
-                          <a
-                            className="text-piccolo"
-                            href={`/user/${listItem.highestbidder}`}
-                          >
-                            {listItem.highestbidder}
-                          </a>
-                        </span>
+                        Voted{" "}
+                        <span className="font-bold">{listItem.votecount}</span>
                       </p>
                       <div className="flex flex-col gap-2 items-center">
-
-                        {EventWaiting === false && EventEnd !== "Finished" ? (<>
-                          <Button
-                            tokenid={listItem.Id}
-                            highestbid={listItem.price}
-                            onClick={activateBidNFTModal}
-                            style={{ width: 240 }}
-                            iconLeft
-                          >
+                        {isJudger !== false && listItem.isVoted !== true? (<>
+                          <Button style={{ width: 240 }} onClick={()=>{VoteProject(listItem.Id)}} >
                             <ControlsPlus className="text-moon-24" />
-                            <div
-                              tokenid={listItem.Id}
-                              highestbid={listItem.price}
-                              className="card BidcontainerCard"
-                            >
-                              <div
-                                tokenid={listItem.Id}
-                                highestbid={listItem.price}
-                                className="card-body bidbuttonText"
-                              >
-                                Place higher bid
+                            <div className="card BidcontainerCard">
+                              <div className="card-body bidbuttonText" >
+                                Place Vote
                               </div>
                             </div>
                           </Button>
                         </>) : (<></>)}
-                        <Button
-                          tokenid={listItem.Id}
-                          title={listItem.name}
-                          onClick={activateViewBidModal}
-                          variant="secondary"
-                          style={{ width: 240 }}
-                          iconLeft
-                        >
-                          <TimeClock className="text-moon-24" />
-                          <div
-                            tokenid={listItem.Id}
-                            title={listItem.name}
-                            className="card BidcontainerCard"
-                          >
-                            <div
-                              tokenid={listItem.Id}
-                              title={listItem.name}
-                              className="card-body bidbuttonText"
-                            >
-                              View bid history
+                        <NavLink href={`/donation/auction?[${listItem.Id}]`}>
+                        <Button variant="secondary" style={{ width: 240 }}>
+                           <div className="card BidcontainerCard">
+                            <div className="card-body bidbuttonText">
+                              Go to project
                             </div>
                           </div>
                         </Button>
+                        </NavLink>
                       </div>
                     </div>
                   </div>

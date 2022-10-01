@@ -23,8 +23,8 @@ async function initContract() {
     const wallet = window.walletConnection;
     // connect to a NEAR smart contract
     window.nearcontract = new nearAPI.Contract(wallet.account(), 'hrea-near3.testnet',{
-      viewMethods: ['get_all_events','event_uri','get_token_search_from_event','get_event_raised','get_tokenid_from_uri','get_tokenuri_from_id','get_bid_info_from_nft','get_all_nfts_from_userid','get_eventid_from_tokenuri','get_all_grant_events','event_grant_uri','get_all_events_from_wallet','get_eventid_from_eventuri','check_submitted_project_grant'],
-      changeMethods: ['create_event', 'mint_nft','bid_nft','set_event','set_event_raised','distribute_nft','send_nft_as_gift','reset_all','create_grant_event','create_grant_project']
+      viewMethods: ['get_all_events','event_uri','get_token_search_from_event','get_event_raised','get_tokenid_from_uri','get_tokenuri_from_id','get_bid_info_from_nft','get_all_nfts_from_userid','get_eventid_from_tokenuri','get_all_grant_events','event_grant_uri','get_all_events_from_wallet','get_eventid_from_eventuri','check_submitted_project_grant','get_project_search_from_grant_event','get_grant_votes_from_grant'],
+      changeMethods: ['create_event', 'mint_nft','bid_nft','set_event','set_event_raised','distribute_nft','send_nft_as_gift','reset_all','create_grant_event','create_grant_project','create_grant_vote']
     })
     // Getting the Account ID. If unauthorized yet, it's just empty string.
     window.accountId = window.walletConnection.getAccountId();

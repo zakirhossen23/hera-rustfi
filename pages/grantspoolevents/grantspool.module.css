@@ -37,8 +37,7 @@
   max-width: 95%;
 }
 
-.nft-image {
-  height: 160px;
+.event-image {
   width: 160px;
   border-radius: 12px;
   overflow: hidden;

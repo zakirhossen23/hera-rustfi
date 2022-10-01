@@ -18,21 +18,24 @@ pub struct Contract {
   _token_bid_id: i32,
   _user_token_id:i32,
   _grant_project_id:i32,
+  _grant_vote_ids:i32,
+  //Variables Multiples
   _token_uris: HashMap<i32, Vec<String>>,           //_token_ids 	        => (NFT)        Token URI 	 + Highest Bidder
   _event_raised: HashMap<i32, String>,              //_event_ids 	        => (Auction)    Raised
-  _event_uris: HashMap<i32, Vec<String>>,           //_event_ids          => (Auction)    Event Wallet + Event URI         + Finished
+  _event_uris: HashMap<i32, Vec<String>>,           //_event_ids          => (Auction)    Event Wallet + Event URI            + Finished
   _event_grant_uris: HashMap<i32, String>,          //_event_grant_ids    => (Grant Pool) Event URI
   all_event_tokens: HashMap<i32, Vec<String>>,      //_event_token_id     => (Auction)    Event ID     + Token URI
   all_tokens_bids: HashMap<i32, Vec<String>>,       //_token_bid_id       => (NFT)        TokenID      + BidURI
-  all_user_tokens: HashMap<i32, Vec<String>>,       //_user_token_id      => (User)       User Address + TokenID           + Gifted
+  all_user_tokens: HashMap<i32, Vec<String>>,       //_user_token_id      => (User)       User Address + TokenID              + Gifted
   all_grant_project: HashMap<i32, Vec<String>>,     //_grant_project_id   => (Grant Pool) Grant Id     + Project(Auction) Id
+  all_grant_votes: HashMap<i32, Vec<String>>,       //_grant_vote_ids     => (Grant Pool) Grant Id     + Project(Auction) Id  + Wallet address
 
-  
 }
 
 impl Default for Contract {
   fn default() -> Self {
     Self {
+      //Variables
       _event_ids : 0,
       _event_grant_ids: 0,
       _token_ids: 0,
@@ -40,7 +43,8 @@ impl Default for Contract {
       _token_bid_id:0,
       _user_token_id:0,
       _grant_project_id:0,
-      //Variables
+      _grant_vote_ids:0,
+      //Variables Multiples
       _token_uris: HashMap::new(),
       _event_raised: HashMap::new(),
       _event_uris: HashMap::new(), 
@@ -49,6 +53,7 @@ impl Default for Contract {
       all_tokens_bids:HashMap::new(),
       all_user_tokens:HashMap::new(),
       all_grant_project:HashMap::new(),
+      all_grant_votes:HashMap::new(),
 
     }
   }
@@ -274,6 +279,8 @@ impl Contract {
     let json = serde_json::to_string(&self._event_grant_uris).unwrap();
     return json;
   }
+//Grant Pool Event + Project(Auction)
+
   pub fn check_submitted_project_grant(&self,grant_id:&i32, project_id:&i32)-> bool{
     for  (_k, v) in self.all_grant_project.iter() {
       if  v[0].to_string() == grant_id.to_string() &&  v[1].to_string() == project_id.to_string(){
@@ -283,7 +290,6 @@ impl Contract {
     return false;
   }
 
-//Grant Pool Event + Project(Auction)
 pub fn create_grant_project(&mut self, grant_id: &i32,project_id: &i32 ) -> i32 {
   let mut stuff : Vec<String> = Vec::new();
   stuff.push(grant_id.to_string());
@@ -292,6 +298,38 @@ pub fn create_grant_project(&mut self, grant_id: &i32,project_id: &i32 ) -> i32 
   self.all_grant_project.insert(self.all_grant_project.len() as i32,stuff);
   self._grant_project_id += 1;
   return self._grant_project_id ;
+}
+pub fn get_project_search_from_grant_event(&self,grant_id:&i32)-> String{
+  //Filtering all the Projects contains Grant id
+  let new: HashMap<&i32, &Vec<String>> =  self.all_grant_project.iter()
+  .filter(|(_id, value)| value[0].to_string() == grant_id.to_string()).collect();
+
+  //Getting only the project URIs from the filtered
+  let projects_uris_list:Vec<String> = new.iter().map(|(_id,value)| {return self.event_uri(&value[1].parse().unwrap())} ).collect();
+
+  return serde_json::to_string(&projects_uris_list).unwrap();
+}
+
+//Voting
+pub fn create_grant_vote(&mut self, grant_id: &i32,project_id: &i32,wallet: String ) -> i32 {
+  let mut stuff : Vec<String> = Vec::new();
+  stuff.push(grant_id.to_string());
+  stuff.push(project_id.to_string());
+  stuff.push(wallet.to_string());
+
+  self.all_grant_votes.insert(self.all_grant_votes.len() as i32,stuff);
+  self._grant_vote_ids += 1;
+  return self._grant_vote_ids ;
+}
+pub fn get_grant_votes_from_grant(&self, grant_id: &i32,project_id: &i32)->String{
+   //Filtering all the Votes by containing Grant id and Project id
+   let new: HashMap<&i32, &Vec<String>> =  self.all_grant_votes.iter()
+   .filter(|(_id, value)| value[0].to_string() == grant_id.to_string() && value[1].to_string() == project_id.to_string() ).collect();
+ 
+   //Getting only the Vote URIs from the filtered
+   let vote_uris_list:Vec<&String> = new.iter().map(|(_id,value)| {return &value[2]} ).collect();
+
+   return serde_json::to_string(&vote_uris_list).unwrap();
 }
 
 //Contract
